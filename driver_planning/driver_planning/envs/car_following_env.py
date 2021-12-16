@@ -21,8 +21,11 @@ class Lateral(Enum):
   LEFT = 1
   RIGHT = 2
 
-CAR_WIDTH = 20
+CAR_WIDTH = 25
 CAR_HEIGHT = 40
+
+LANE_WIDTH = 35
+LANE_LINE_WIDTH = 4
 
 SCREEN_WIDTH = 300
 SCREEN_HEIGHT = 500
@@ -46,6 +49,8 @@ class CarFollowingEnv(gym.Env):
   def reset(self, seed):
     random.seed(seed)
 
+    self.num_lanes = random.randint(3, 5)
+
     self.agents = []
     for idx in range(random.randint(2, 6)):
       # TODO no collision checks
@@ -61,6 +66,18 @@ class CarFollowingEnv(gym.Env):
     if self.viewer is None:
       # Viewer shows only quarter of requrested view, i.e. middle point is top right corner
       self.viewer = rendering.Viewer(2*SCREEN_WIDTH, 2*SCREEN_HEIGHT)
+
+      for lane_id in range(self.num_lanes+1):
+        lane_x = (2*SCREEN_WIDTH - self.num_lanes * LANE_WIDTH)/ 2 + lane_id * LANE_WIDTH
+        lane_line = rendering.FilledPolygon([
+          (lane_x-LANE_LINE_WIDTH/2, 0), (lane_x-LANE_LINE_WIDTH/2, SCREEN_HEIGHT),
+          (lane_x+LANE_LINE_WIDTH/2, 2*SCREEN_HEIGHT), (lane_x+LANE_LINE_WIDTH/2, 0)])
+        if lane_id in [0, self.num_lanes]: # edge lanes
+          lane_line.set_color(1, 1, 0)
+        else:
+          lane_line.set_color(0, 0, 0)
+        self.viewer.add_geom(lane_line)
+
       self.car_trans = []
       for agent in self.agents:
         trans = self._render_car(agent)
