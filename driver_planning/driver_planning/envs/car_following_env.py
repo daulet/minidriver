@@ -53,10 +53,12 @@ class CarFollowingEnv(gym.Env):
 
     self.agents = []
     for idx in range(random.randint(2, 6)):
+      lane = random.randint(0, self.num_lanes-1)
       # TODO no collision checks
       self.agents.append(
         Car(idx,
-          random.randint(CAR_WIDTH, SCREEN_WIDTH - CAR_WIDTH),
+          # divide by 4, not 2 because coordinate system is messed up, sometimes things are double
+          (self._lane_left_boundary(lane) + self._lane_left_boundary(lane+1))/4,
           random.randint(CAR_HEIGHT, SCREEN_HEIGHT - CAR_HEIGHT),
           random.randint(1, 3)))
 
@@ -68,7 +70,7 @@ class CarFollowingEnv(gym.Env):
       self.viewer = rendering.Viewer(2*SCREEN_WIDTH, 2*SCREEN_HEIGHT)
 
       for lane_id in range(self.num_lanes+1):
-        lane_x = (2*SCREEN_WIDTH - self.num_lanes * LANE_WIDTH)/ 2 + lane_id * LANE_WIDTH
+        lane_x = self._lane_left_boundary(lane_id)
         lane_line = rendering.FilledPolygon([
           (lane_x-LANE_LINE_WIDTH/2, 0), (lane_x-LANE_LINE_WIDTH/2, SCREEN_HEIGHT),
           (lane_x+LANE_LINE_WIDTH/2, 2*SCREEN_HEIGHT), (lane_x+LANE_LINE_WIDTH/2, 0)])
@@ -88,6 +90,9 @@ class CarFollowingEnv(gym.Env):
 
     return self.viewer.render(return_rgb_array=mode == "rgb_array")
 
+
+  def _lane_left_boundary(self, lane_id):
+    return (2*SCREEN_WIDTH - self.num_lanes * LANE_WIDTH)/ 2 + lane_id * LANE_WIDTH
 
   def _render_car(self, car):
     l, r = car.x - CAR_WIDTH / 2,   car.x + CAR_WIDTH / 2
