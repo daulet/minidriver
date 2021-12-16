@@ -11,16 +11,6 @@ from gym.utils import seeding
 
 from .car import Car
 
-class Acceleration(Enum):
-  NEUTRAL = 0
-  SLOW_DOWN = 1
-  ACCELERATE = 2
-
-class Lateral(Enum):
-  STRAIGHT = 0
-  LEFT = 1
-  RIGHT = 2
-
 CAR_WIDTH = 25
 CAR_HEIGHT = 40
 
@@ -40,6 +30,9 @@ class CarFollowingEnv(gym.Env):
 
 
   def step(self, action):
+    accel, _ = action # TODO lateral not supported yet
+    self.agents[0].update(accel, 0)
+
     for car in self.agents:
       car.step()
 
