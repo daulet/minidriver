@@ -1,4 +1,10 @@
+## Install
 ```
-cd driver_planning/driver_planning
+cd driver_planning
 pip install -e .
+```
+
+## Test
+```
+pytest
 ```

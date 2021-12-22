@@ -68,18 +68,27 @@ class CarFollowingEnv(gym.Env):
 
     self.num_lanes = random.randint(3, 5)
 
-    self.agents = []
-    for idx in range(random.randint(2, 6)):
-      lane = random.randint(0, self.num_lanes-1)
-      # TODO no collision checks
+    ego_lane = random.randint(0, self.num_lanes-1)
+    ego = Car(0,
+            (self._lane_left_boundary(ego_lane) + self._lane_left_boundary(ego_lane+1))/2,
+            random.randint(SCREEN_HEIGHT/2, SCREEN_HEIGHT - CAR_HEIGHT),
+            5, # faster so it can catch up to car ahead if no action
+          )
+    self.agents = [ego]
+    
+    time_till_offscreen = ego.y // ego.speed
+
+    for idx in range(1, 2):
       self.agents.append(
         Car(idx,
-          (self._lane_left_boundary(lane) + self._lane_left_boundary(lane+1))/2,
-          random.randint(CAR_HEIGHT, SCREEN_HEIGHT - CAR_HEIGHT),
-          random.randint(1, 3)))
+          (self._lane_left_boundary(ego_lane) + self._lane_left_boundary(ego_lane+1))/2,
+          random.randint(time_till_offscreen+1, ego.y), # ahead of ego
+          1, # slow so ego would catch it if no action
+        )
+      )
 
 
-  def render(self, mode='human'):
+  def render(self, mode='human', fps=FPS):
     
     if self.surface is None:
       pygame.init()
@@ -98,7 +107,7 @@ class CarFollowingEnv(gym.Env):
       self._render_car(agent)
 
     pygame.display.update()
-    pygame.time.Clock().tick(FPS)
+    pygame.time.Clock().tick(fps)
 
 
   def _lane_left_boundary(self, lane_id):
