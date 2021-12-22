@@ -1,7 +1,7 @@
 ## Install
 ```
-cd driver_planning
-pip install -e .
+pip install -r requirements.txt
+pip install -e ./driver_planning
 ```
 
 ## Test
