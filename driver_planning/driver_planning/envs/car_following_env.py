@@ -47,7 +47,20 @@ class CarFollowingEnv(gym.Env):
     if ego.y < 0 or ego.y > SCREEN_HEIGHT:
       done = True
 
-    return None, 0, done, {} # observation, reward, done, info
+    #
+    # Reward:
+    #
+    reward = 0
+    # hitting a car -10**6
+    ego_rect = self._car_rect(ego)
+    for i in range(1, len(self.agents)):
+      agent_rect = self._car_rect(self.agents[i])
+      if ego_rect.colliderect(agent_rect):
+        reward -= 1e6
+        done = True
+        break
+
+    return None, reward , done, {} # observation, reward, done, info
 
 
   def reset(self, seed):
@@ -91,13 +104,17 @@ class CarFollowingEnv(gym.Env):
   def _lane_left_boundary(self, lane_id):
     return (SCREEN_WIDTH - self.num_lanes * LANE_WIDTH)/ 2 + lane_id * LANE_WIDTH
 
-  def _render_car(self, car):
+  def _car_rect(self, car):
     rect = pygame.Rect(0, 00, CAR_WIDTH, CAR_HEIGHT)
     rect.center = (car.x, car.y)
+    return rect
+
+  def _render_car(self, car):
+    rect = self._car_rect(car)
     color = (0, 0, 255)
     if car.id == 0: # ID 0 is Ego
       color = (0, 255, 0)
-    pygame.draw.rect(self.surface, color, rect) 
+    pygame.draw.rect(self.surface, color, rect)
 
 
   def close(self):
