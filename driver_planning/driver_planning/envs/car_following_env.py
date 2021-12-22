@@ -30,12 +30,24 @@ class CarFollowingEnv(gym.Env):
 
   def step(self, action):
     accel, _ = action # TODO lateral not supported yet
-    self.agents[0].update(accel, 0)
+    done = False
 
+    #
+    # Action
+    #
+    ego = self.agents[0]
+    ego.update(accel, 0)
+
+    #
+    # Update
+    #
     for car in self.agents:
       car.step()
 
-    return None, 0, False, {} # observation, reward, done, info
+    if ego.y < 0 or ego.y > SCREEN_HEIGHT:
+      done = True
+
+    return None, 0, done, {} # observation, reward, done, info
 
 
   def reset(self, seed):

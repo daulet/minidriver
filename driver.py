@@ -6,7 +6,12 @@ import driver_planning
 env = gym.make('driver_planning:car-following-v0')
 env.reset(seed = time.time())
 
-for _ in range(200):
+total, done = 0, False
+while not done:
+    # take a random action
+    _, reward, done, _ = env.step(env.action_space.sample())
+    total += reward
     env.render()
-    env.step(env.action_space.sample()) # take a random action
+print("Reward:", total)
+input("Press Enter to continue...")
 env.close()
