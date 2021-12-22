@@ -26,7 +26,7 @@ class Car(object):
         }
 
     def step(self):
-        self.y += self.speed
+        self.y -= self.speed
         return self.x, self.y
 
     def update(self, accel, lat):
