@@ -31,3 +31,22 @@ def test_collision_no_render():
     env.close()
 
     assert reward == -1e6
+
+def test_slow_achieves_goal():
+    env = gym.make('driver_planning:car-following-v0')
+    env.reset(seed = time.time())
+
+    total, done = 0, False
+    for _ in range(4):
+         _, reward, done, _ = env.step((Acceleration.SLOW_DOWN, Lateral.STRAIGHT))
+         total += reward
+         env.render(fps=240)
+
+    while not done:
+        _, reward, done, _ = env.step((Acceleration.NEUTRAL, Lateral.STRAIGHT))
+        total += reward
+        env.render(fps=240)
+        
+    env.close()
+
+    assert reward == 1e3

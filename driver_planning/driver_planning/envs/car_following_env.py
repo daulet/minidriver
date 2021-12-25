@@ -82,6 +82,10 @@ class CarFollowingEnv(gym.Env):
         reward -= 1e6
         done = True
         break
+    if ego_rect.collidepoint(*self.goal):
+      reward += 1e3
+      done = True
+
     return states, reward , done, {} # observation, reward, done, info
 
 
