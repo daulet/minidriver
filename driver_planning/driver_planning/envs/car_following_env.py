@@ -91,9 +91,9 @@ class CarFollowingEnv(gym.Env):
     #
     # Reward
     # hitting a car: -1e9
-    # hitting a goal: 1e7
+    # complete stop: -1e5
     # getting closer to a goal: linearly grows
-    # speed == 0: not yet punished
+    # hitting a goal: 1e7
     reward = 0
     ego_rect = self._car_rect(ego)
     for i in range(1, len(self.agents)):

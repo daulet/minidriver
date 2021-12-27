@@ -62,3 +62,80 @@ def test_stopping_is_punished():
     env.close()
 
     assert reward == -1e5
+
+def test_recorded_observations():
+    env = gym.make('driver_planning:car-following-v0')
+    env.reset(seed = 0)
+
+    actual_observations = []
+    total, done = 0, False
+    for _ in range(10):
+        obs, reward, done, _ = env.step((Acceleration.NEUTRAL, Lateral.STRAIGHT))
+        actual_observations.append(obs)
+        total += reward
+
+    assert actual_observations == [
+        {'dynamic': (0.0,
+                        139,
+                        2),
+            'goal': (0.0,
+                    255),
+            'speed': 5},
+        {'dynamic': (0.0,
+                        137,
+                        2),
+            'goal': (0.0,
+                    250),
+            'speed': 5},
+        {'dynamic': (0.0,
+                        135,
+                        2),
+            'goal': (0.0,
+                    245),
+            'speed': 5},
+        {'dynamic': (0.0,
+                        133,
+                        2),
+            'goal': (0.0,
+                    240),
+            'speed': 5},
+        {'dynamic': (0.0,
+                        131,
+                        2),
+            'goal': (0.0,
+                    235),
+            'speed': 5},
+        {'dynamic': (0.0,
+                        129,
+                        2),
+            'goal': (0.0,
+                    230),
+            'speed': 5},
+        {'dynamic': (0.0,
+                        127,
+                        2),
+            'goal': (0.0,
+                    225),
+            'speed': 5},
+        {'dynamic': (0.0,
+                        125,
+                        2),
+            'goal': (0.0,
+                    220),
+            'speed': 5},
+        {'dynamic': (0.0,
+                        123,
+                        2),
+            'goal': (0.0,
+                    215),
+            'speed': 5},
+        {'dynamic': (0.0,
+                        121,
+                        2),
+            'goal': (0.0,
+                    210),
+            'speed': 5},
+    ]
+
+        
+    env.close()
