@@ -47,8 +47,18 @@ def test_slow_achieves_goal():
     while not done:
         _, reward, done, _ = env.step((Acceleration.NEUTRAL, Lateral.STRAIGHT))
         total += reward
-        env.render(fps=1000)
         
     env.close()
 
     assert total > 0
+
+def test_stopping_is_punished():
+    env = gym.make('driver_planning:car-following-v0')
+    env.reset(seed = time.time())
+    
+    for i in range(MAX_SPEED):
+        _, reward, _, _ = env.step((Acceleration.SLOW_DOWN, Lateral.STRAIGHT))
+        
+    env.close()
+
+    assert reward == -1e5
