@@ -97,15 +97,20 @@ class CarFollowingEnv(gym.Env):
     # reaching a goal: 1.0
     reward = 0
     ego_rect = self._car_rect(ego)
+
     for i in range(1, len(self.agents)):
       agent_rect = self._car_rect(self.agents[i])
       if ego_rect.colliderect(agent_rect):
         reward = -1
         done = True
         break
+
     if not done:
       if ego.x < self._lane_left_boundary(0) or ego.x > self._lane_left_boundary(self.num_lanes):
         reward = -0.5
+      # if not driving in a lane
+      elif self._current_lane(ego.x-CAR_WIDTH/2) != self._current_lane(ego.x+CAR_WIDTH/2):
+        reward = -0.01
       elif ego.speed == 0:
         reward = -0.5
       elif ego_rect.collidepoint(*self.goal):
@@ -188,6 +193,9 @@ class CarFollowingEnv(gym.Env):
 
   def _lane_left_boundary(self, lane_id):
     return (SCREEN_WIDTH - self.num_lanes * LANE_WIDTH)/ 2 + lane_id * LANE_WIDTH
+
+  def _current_lane(self, x):
+    return int((x - self._lane_left_boundary(0)) / LANE_WIDTH)
 
   def _car_rect(self, car):
     rect = pygame.Rect(0, 00, CAR_WIDTH, CAR_HEIGHT)

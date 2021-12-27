@@ -68,6 +68,20 @@ def test_stopping_is_punished():
 
     assert reward == -0.5
 
+def test_off_lane_is_punished():
+    env = gym.make('driver_planning:car-following-v0')
+    env.reset(seed = time.time())
+    
+    for _ in range(2):
+        _, reward, _, _ = env.step((Acceleration.NEUTRAL, Lateral.LEFT))
+    assert reward == -0.01
+
+    for _ in range(4):
+        _, reward, _, _ = env.step((Acceleration.NEUTRAL, Lateral.RIGHT))
+    assert reward == -0.01
+
+    env.close()
+
 def test_recorded_observations():
     env = gym.make('driver_planning:car-following-v0')
     env.reset(seed = 0)
