@@ -1,20 +1,16 @@
 import os
+import sys
 import time
 
 import gym
 from stable_baselines3 import PPO
 
-def newest(path):
-    files = os.listdir(path)
-    paths = [os.path.join(path, basename) for basename in files]
-    return max(paths, key=os.path.getctime)
-
-def main():
-  path = newest("models")
+def main(path):
   print("Loading model from", path)
   model = PPO.load(path)
   print("Testing model...")
   test(model) 
+
 
 def test(model):
   env = gym.make("driver_planning:car-following-v0", debug=True)
@@ -34,5 +30,13 @@ def test(model):
   env.close()
 
 
+def newest(path):
+    files = os.listdir(path)
+    paths = [os.path.join(path, basename) for basename in files]
+    return max(paths, key=os.path.getctime)
+
+
 if __name__ == "__main__":
-  main()
+  args = sys.argv[1:]
+  path = len(args) > 0 and args[0] or newest("models")
+  main(path)
