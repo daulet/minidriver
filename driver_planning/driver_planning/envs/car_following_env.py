@@ -110,7 +110,6 @@ class CarFollowingEnv(gym.Env):
         reward = -0.5
       elif ego_rect.collidepoint(*self.goal):
         reward = 1
-        self._print("HIT THE GOAL on step", self.steps, "reward:", self.rewards+reward)
         done = True
       else:
         reward = 0.001 # incentivize movement
@@ -120,7 +119,10 @@ class CarFollowingEnv(gym.Env):
       done = True
     self.rewards += reward
     if done:
-      self._print("completed with", self.rewards)
+      if reward == 1:
+        self._print(f"[SUCCESS] steps: {self.steps}, reward: {self.rewards:.3f}")
+      else:
+        self._print(f"[FAILED]  steps: {self.steps}, reward: {self.rewards:.3f}")
 
     return states, reward , done, {} # observation, reward, done, info
 
