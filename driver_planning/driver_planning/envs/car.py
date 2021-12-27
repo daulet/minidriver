@@ -10,6 +10,8 @@ class Lateral(Enum):
   LEFT = 1
   RIGHT = 2
 
+MAX_SPEED=5
+
 class Car(object):
 
     def __init__(self, id, x, y, speed) -> None:
@@ -33,3 +35,5 @@ class Car(object):
         assert lat == 0 # TODO lateral not supported yet
 
         self.speed += self.increment[Acceleration(accel)]
+        self.speed = min(self.speed, MAX_SPEED)
+        self.speed = max(self.speed, 0)
