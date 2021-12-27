@@ -39,11 +39,16 @@ def test_collision_no_render():
 def test_slow_achieves_goal():
     env = gym.make('driver_planning:car-following-v0')
     env.reset(seed = time.time())
-    # ensure ego speed == 1
-    # TODO make sure this doesn't happen in training?
-    env.agents[0].speed = 1
 
     total, done = 0, False
+
+    # ensure ego speed == 1
+    for i in range(MAX_SPEED):
+        _, reward, _, _ = env.step((Acceleration.SLOW_DOWN, Lateral.STRAIGHT))
+        total += reward
+    _, reward, _, _ = env.step((Acceleration.ACCELERATE, Lateral.STRAIGHT))
+    total += reward
+
     while not done:
         _, reward, done, _ = env.step((Acceleration.NEUTRAL, Lateral.STRAIGHT))
         total += reward
