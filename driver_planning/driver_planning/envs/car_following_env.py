@@ -1,4 +1,5 @@
 from enum import Enum
+import math
 import random
 import time
 from typing import Optional
@@ -9,7 +10,7 @@ from gym.utils import seeding
 import numpy as np
 import pygame
 
-from .car import Car
+from .car import MAX_SPEED, Car
 
 CAR_WIDTH = 25
 CAR_HEIGHT = 40
@@ -27,8 +28,9 @@ class CarFollowingEnv(gym.Env):
   action_space = spaces.MultiDiscrete([3, 3])
   observation_space = spaces.Dict({
     "goal":       spaces.Box(low=0,       high=np.inf, shape=(2,), dtype=np.float32),
-    "boundaries": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32),
+    # "boundaries": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32),
     "dynamic":    spaces.Box(low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32),
+    # "speed":      spaces.Discrete(MAX_SPEED+1),
   })
   def __init__(self):
     self.surface = None
@@ -46,13 +48,16 @@ class CarFollowingEnv(gym.Env):
     rb = self._lane_left_boundary(self.num_lanes)
     return {
       "goal":       (abs(ego.x-gx), abs(ego.y-gy)), # distance to goal;
-      "boundaries": (ego.x-lb, rb-ego.x),           # (left, right) distance to road boundaries;
+      # "boundaries": (ego.x-lb, rb-ego.x),           # (left, right) distance to road boundaries;
       # TODO fix shape of this box to allow multiple distances
       "dynamic":    distances[0],                      # distances to dynamic agents; 
+      # "speed":      ego.speed,
     }
 
 
   def step(self, action):
+    self.steps += 1
+
     accel, _ = action # TODO lateral not supported yet
     done = False
 
@@ -78,19 +83,36 @@ class CarFollowingEnv(gym.Env):
 
     #
     # Reward
-    #
+    # hitting a car: -1e9
+    # hitting a goal: 1e7
+    # getting closer to a goal: linearly grows
+    # speed == 0: not yet punished
     reward = 0
-    # hitting a car -10**6
     ego_rect = self._car_rect(ego)
     for i in range(1, len(self.agents)):
       agent_rect = self._car_rect(self.agents[i])
       if ego_rect.colliderect(agent_rect):
-        reward -= 1e6
+        reward = -1e9
         done = True
         break
-    if ego_rect.collidepoint(*self.goal):
-      reward += 1e3
+    if not done:
+      if ego_rect.collidepoint(*self.goal):
+        reward = 1e7
+        print("HIT THE GOAL on step", self.steps, "reward:", self.rewards+reward)
+        done = True
+      # elif ego.speed == 0:
+      #   reward = -1e5
+      else:
+        gx, gy = self.goal
+        gdist = math.sqrt((ego.x-gx)**2 + (ego.y-gy)**2)
+        reward = SCREEN_HEIGHT+SCREEN_WIDTH-gdist # incentivize getting closer to the goal
+
+    # limit ego that just stops
+    if self.steps == SCREEN_HEIGHT:
       done = True
+    self.rewards += reward
+    if done:
+      print("completed with", self.rewards)
 
     return states, reward , done, {} # observation, reward, done, info
 
@@ -99,6 +121,9 @@ class CarFollowingEnv(gym.Env):
     if seed is None:
       seed = time.time()
     random.seed(seed)
+
+    self.steps = 0
+    self.rewards = 0
 
     self.num_lanes = random.randint(3, 5)
     ego_lane = random.randint(0, self.num_lanes-1)
@@ -118,8 +143,8 @@ class CarFollowingEnv(gym.Env):
       self.agents.append(
         Car(idx,
           (self._lane_left_boundary(ego_lane) + self._lane_left_boundary(ego_lane+1))/2,
-          random.randint(time_till_offscreen+1, ego.y), # ahead of ego
-          1, # slow so ego would catch it if no action
+          random.randint(time_till_offscreen+1, ego.y-CAR_HEIGHT), # ahead of ego
+          random.randint(1,3),
         )
       )
     return self._state()
