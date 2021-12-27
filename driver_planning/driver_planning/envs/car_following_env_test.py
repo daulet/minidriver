@@ -78,18 +78,19 @@ def test_recorded_observations():
         obs, reward, _, _ = env.step((Acceleration.NEUTRAL, Lateral.STRAIGHT))
         actual_observations.append(obs)
         total += reward
+        # print(f"{obs},")
 
     assert actual_observations == [
-        {'dynamic': (0.0, 75, 2), 'goal': (0.0, 255), 'speed': 5},
-        {'dynamic': (0.0, 73, 2), 'goal': (0.0, 250), 'speed': 5},
-        {'dynamic': (0.0, 71, 2), 'goal': (0.0, 245), 'speed': 5},
-        {'dynamic': (0.0, 69, 2), 'goal': (0.0, 240), 'speed': 5},
-        {'dynamic': (0.0, 67, 2), 'goal': (0.0, 235), 'speed': 5},
-        {'dynamic': (0.0, 65, 2), 'goal': (0.0, 230), 'speed': 5},
-        {'dynamic': (0.0, 63, 2), 'goal': (0.0, 225), 'speed': 5},
-        {'dynamic': (0.0, 61, 2), 'goal': (0.0, 220), 'speed': 5},
-        {'dynamic': (0.0, 59, 2), 'goal': (0.0, 215), 'speed': 5},
-        {'dynamic': (0.0, 57, 2), 'goal': (0.0, 210), 'speed': 5},
+        {'goal': (0.0, 255), 'boundaries': (122.5, 17.5), 'dynamic': (0.0, 75, 2), 'speed': 5},
+        {'goal': (0.0, 250), 'boundaries': (122.5, 17.5), 'dynamic': (0.0, 73, 2), 'speed': 5},
+        {'goal': (0.0, 245), 'boundaries': (122.5, 17.5), 'dynamic': (0.0, 71, 2), 'speed': 5},
+        {'goal': (0.0, 240), 'boundaries': (122.5, 17.5), 'dynamic': (0.0, 69, 2), 'speed': 5},
+        {'goal': (0.0, 235), 'boundaries': (122.5, 17.5), 'dynamic': (0.0, 67, 2), 'speed': 5},
+        {'goal': (0.0, 230), 'boundaries': (122.5, 17.5), 'dynamic': (0.0, 65, 2), 'speed': 5},
+        {'goal': (0.0, 225), 'boundaries': (122.5, 17.5), 'dynamic': (0.0, 63, 2), 'speed': 5},
+        {'goal': (0.0, 220), 'boundaries': (122.5, 17.5), 'dynamic': (0.0, 61, 2), 'speed': 5},
+        {'goal': (0.0, 215), 'boundaries': (122.5, 17.5), 'dynamic': (0.0, 59, 2), 'speed': 5},
+        {'goal': (0.0, 210), 'boundaries': (122.5, 17.5), 'dynamic': (0.0, 57, 2), 'speed': 5}
     ]
 
     assert total > 0.01

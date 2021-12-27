@@ -33,6 +33,7 @@ def test(model, rounds=10):
 def newest(path):
     files = os.listdir(path)
     paths = [os.path.join(path, basename) for basename in files]
+    assert paths, "No files in " + path
     return max(paths, key=os.path.getctime)
 
 

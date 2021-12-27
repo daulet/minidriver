@@ -28,7 +28,7 @@ class CarFollowingEnv(gym.Env):
   action_space = spaces.MultiDiscrete([3, 3])
   observation_space = spaces.Dict({
     "goal":       spaces.Box(low=0,       high=np.inf, shape=(2,), dtype=np.float32),
-    # "boundaries": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32),
+    "boundaries": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32),
     "dynamic":    spaces.Box(low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32),
     "speed":      spaces.Discrete(MAX_SPEED+1),
   })
@@ -55,7 +55,7 @@ class CarFollowingEnv(gym.Env):
     rb = self._lane_left_boundary(self.num_lanes)
     return {
       "goal":       (abs(ego.x-gx), abs(ego.y-gy)), # distance to goal;
-      # "boundaries": (ego.x-lb, rb-ego.x),           # (left, right) distance to road boundaries;
+      "boundaries": (ego.x-lb, rb-ego.x),           # (left, right) distance to road boundaries;
       # TODO fix shape of this box to allow multiple distances
       "dynamic":    distances[0],                      # distances to dynamic agents; 
       "speed":      ego.speed,
@@ -65,14 +65,14 @@ class CarFollowingEnv(gym.Env):
   def step(self, action):
     self.steps += 1
 
-    accel, _ = action # TODO lateral not supported yet
+    accel, lat = action
     done = False
 
     #
     # Action
     #
     ego = self.agents[0]
-    ego.update(accel, 0)
+    ego.update(accel, lat)
 
     #
     # Update
@@ -92,6 +92,7 @@ class CarFollowingEnv(gym.Env):
     # Reward
     # hitting a car: -1.0
     # complete stop: -0.5
+    # going off road: -0.5
     # any movement: 0.001
     # reaching a goal: 1.0
     reward = 0
@@ -103,12 +104,14 @@ class CarFollowingEnv(gym.Env):
         done = True
         break
     if not done:
-      if ego_rect.collidepoint(*self.goal):
+      if ego.x < self._lane_left_boundary(0) or ego.x > self._lane_left_boundary(self.num_lanes):
+        reward = -0.5
+      elif ego.speed == 0:
+        reward = -0.5
+      elif ego_rect.collidepoint(*self.goal):
         reward = 1
         self._print("HIT THE GOAL on step", self.steps, "reward:", self.rewards+reward)
         done = True
-      elif ego.speed == 0:
-        reward = -0.5
       else:
         reward = 0.001 # incentivize movement
 
