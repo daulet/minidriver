@@ -1,10 +1,19 @@
+import os
 import time
 
 import gym
 from stable_baselines3 import PPO
 
+def newest(path):
+    files = os.listdir(path)
+    paths = [os.path.join(path, basename) for basename in files]
+    return max(paths, key=os.path.getctime)
+
 def main():
-  model = PPO.load("models/ppo_carfollowing_10000")
+  path = newest("models")
+  print("Loading model from", path)
+  model = PPO.load(path)
+  print("Testing model...")
   test(model) 
 
 def test(model):
