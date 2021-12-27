@@ -17,7 +17,7 @@ def test_collision():
     while not done:
         _, reward, done, _ = env.step((Acceleration.NEUTRAL, Lateral.STRAIGHT))
         total += reward
-        env.render(fps=240)
+        env.render(fps=1000)
     env.close()
 
     assert reward == -1e9
@@ -47,7 +47,7 @@ def test_slow_achieves_goal():
     while not done:
         _, reward, done, _ = env.step((Acceleration.NEUTRAL, Lateral.STRAIGHT))
         total += reward
-        env.render(fps=240)
+        env.render(fps=1000)
         
     env.close()
 

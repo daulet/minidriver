@@ -30,7 +30,7 @@ class CarFollowingEnv(gym.Env):
     "goal":       spaces.Box(low=0,       high=np.inf, shape=(2,), dtype=np.float32),
     # "boundaries": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32),
     "dynamic":    spaces.Box(low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32),
-    # "speed":      spaces.Discrete(MAX_SPEED+1),
+    "speed":      spaces.Discrete(MAX_SPEED+1),
   })
 
   def __init__(self, debug=False):
@@ -58,7 +58,7 @@ class CarFollowingEnv(gym.Env):
       # "boundaries": (ego.x-lb, rb-ego.x),           # (left, right) distance to road boundaries;
       # TODO fix shape of this box to allow multiple distances
       "dynamic":    distances[0],                      # distances to dynamic agents; 
-      # "speed":      ego.speed,
+      "speed":      ego.speed,
     }
 
 
@@ -107,8 +107,8 @@ class CarFollowingEnv(gym.Env):
         reward = 1e7
         self._print("HIT THE GOAL on step", self.steps, "reward:", self.rewards+reward)
         done = True
-      # elif ego.speed == 0:
-      #   reward = -1e5
+      elif ego.speed == 0:
+        reward = -1e5
       else:
         gx, gy = self.goal
         gdist = math.sqrt((ego.x-gx)**2 + (ego.y-gy)**2)
