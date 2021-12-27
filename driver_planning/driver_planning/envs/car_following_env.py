@@ -36,12 +36,10 @@ class CarFollowingEnv(gym.Env):
 
   def __init__(self, debug=False):
     self.surface = None
-    self.debug = debug
-
-
-  def _print(self, *values: object):
-    if self.debug:
-      print(*values)
+    if debug:
+      self._print = print
+    else:
+      self._print = lambda *args: None
 
 
   def _state(self):
