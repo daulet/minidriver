@@ -4,8 +4,8 @@ from stable_baselines3.common.env_util import make_vec_env
 
 from test import test
 
-ITERATION = 2e5
-arch = [16, 8, 8]
+ITERATION = 1e5
+arch = [16, 16, 16]
 
 env = make_vec_env("driver_planning:car-following-v0", n_envs=8)
 model = PPO(
