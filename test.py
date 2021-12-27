@@ -6,12 +6,16 @@ from stable_baselines3 import PPO
 env = gym.make("driver_planning:car-following-v0")
 model = PPO.load("models/ppo_carfollowing_10000")
 
-obs = env.reset(seed=time.time())
-for i in range(100):
+rounds, wins = 10, 0
+for i in range(rounds):
+  obs, rew = env.reset(seed=time.time()), 0
+  done = False
+  while not done:
     action, _states = model.predict(obs, deterministic=True)
     obs, reward, done, info = env.step(action)
-    env.render()
-    if done:
-      obs = env.reset(seed=time.time())
-
+    rew += reward
+    env.render(fps=240)
+  wins += rew > 0
+  print("reward:", rew)
+print(f"Wins: {wins}/{rounds}")
 env.close()
