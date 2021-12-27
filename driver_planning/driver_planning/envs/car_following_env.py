@@ -32,8 +32,15 @@ class CarFollowingEnv(gym.Env):
     "dynamic":    spaces.Box(low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32),
     # "speed":      spaces.Discrete(MAX_SPEED+1),
   })
-  def __init__(self):
+
+  def __init__(self, debug=False):
     self.surface = None
+    self.debug = debug
+
+
+  def _print(self, *values: object):
+    if self.debug:
+      print(*values)
 
 
   def _state(self):
@@ -98,7 +105,7 @@ class CarFollowingEnv(gym.Env):
     if not done:
       if ego_rect.collidepoint(*self.goal):
         reward = 1e7
-        print("HIT THE GOAL on step", self.steps, "reward:", self.rewards+reward)
+        self._print("HIT THE GOAL on step", self.steps, "reward:", self.rewards+reward)
         done = True
       # elif ego.speed == 0:
       #   reward = -1e5
@@ -112,7 +119,7 @@ class CarFollowingEnv(gym.Env):
       done = True
     self.rewards += reward
     if done:
-      print("completed with", self.rewards)
+      self._print("completed with", self.rewards)
 
     return states, reward , done, {} # observation, reward, done, info
 
