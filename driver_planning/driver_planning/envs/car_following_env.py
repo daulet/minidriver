@@ -145,11 +145,15 @@ class CarFollowingEnv(gym.Env):
     time_till_offscreen = ego.y // ego.speed
 
     for idx in range(1, 2):
+      speed = random.randint(1, MAX_SPEED)
+      away_from_ego = CAR_HEIGHT
+      for s in range(ego.speed-speed+1):
+        away_from_ego += s
       self.agents.append(
         Car(idx,
           (self._lane_left_boundary(ego_lane) + self._lane_left_boundary(ego_lane+1))/2,
-          random.randint(time_till_offscreen+1, ego.y-CAR_HEIGHT), # ahead of ego
-          random.randint(1,3),
+          random.randint(time_till_offscreen+1, ego.y-away_from_ego), # ahead of ego
+          speed,
         )
       )
     return self._state()
