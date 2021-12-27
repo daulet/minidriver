@@ -24,7 +24,7 @@ def test(model, rounds=10):
       obs, reward, done, info = env.step(action)
       rew += reward
       env.render(fps=240)
-    wins += rew > 1
+    wins += rew > 0.5
   print(f"Wins: {wins}/{rounds}")
   env.close()
 

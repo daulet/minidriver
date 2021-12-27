@@ -11,6 +11,7 @@ import numpy as np
 import pygame
 
 from .car import MAX_SPEED, Car
+from .colors import bcolors
 
 CAR_WIDTH = 25
 CAR_HEIGHT = 40
@@ -125,9 +126,9 @@ class CarFollowingEnv(gym.Env):
     self.rewards += reward
     if done:
       if reward == 1:
-        self._print(f"[SUCCESS] steps: {self.steps}, reward: {self.rewards:.3f}")
+        self._print(f"{bcolors.OKGREEN}[SUCCESS]\tsteps: {self.steps},\treward: {self.rewards:7.3f}{bcolors.ENDC}")
       else:
-        self._print(f"[FAILED]  steps: {self.steps}, reward: {self.rewards:.3f}")
+        self._print(f"{bcolors.FAIL}[FAILED]\tsteps: {self.steps},\treward: {self.rewards:7.3f}{bcolors.ENDC}")
 
     return states, reward , done, {} # observation, reward, done, info
 
