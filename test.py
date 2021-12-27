@@ -9,13 +9,13 @@ def main(path):
   print("Loading model from", path)
   model = PPO.load(path)
   print("Testing model...")
-  test(model) 
+  test(model, rounds=100) 
 
 
-def test(model):
+def test(model, rounds=10):
   env = gym.make("driver_planning:car-following-v0", debug=True)
   
-  rounds, wins = 10, 0
+  wins = 0
   for i in range(rounds):
     obs, rew = env.reset(seed=time.time()), 0
     done = False

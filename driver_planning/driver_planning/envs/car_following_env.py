@@ -90,29 +90,27 @@ class CarFollowingEnv(gym.Env):
 
     #
     # Reward
-    # hitting a car: -1e9
-    # complete stop: -1e5
-    # getting closer to a goal: linearly grows
-    # hitting a goal: 1e7
+    # hitting a car: -1.0
+    # complete stop: -0.5
+    # any movement: 0.001
+    # reaching a goal: 1.0
     reward = 0
     ego_rect = self._car_rect(ego)
     for i in range(1, len(self.agents)):
       agent_rect = self._car_rect(self.agents[i])
       if ego_rect.colliderect(agent_rect):
-        reward = -1e9
+        reward = -1
         done = True
         break
     if not done:
       if ego_rect.collidepoint(*self.goal):
-        reward = 1e7
+        reward = 1
         self._print("HIT THE GOAL on step", self.steps, "reward:", self.rewards+reward)
         done = True
       elif ego.speed == 0:
-        reward = -1e5
+        reward = -0.5
       else:
-        gx, gy = self.goal
-        gdist = math.sqrt((ego.x-gx)**2 + (ego.y-gy)**2)
-        reward = SCREEN_HEIGHT+SCREEN_WIDTH-gdist # incentivize getting closer to the goal
+        reward = 0.001 # incentivize movement
 
     # limit ego that just stops
     if self.steps == SCREEN_HEIGHT:

@@ -20,7 +20,7 @@ def test_collision():
         env.render(fps=1000)
     env.close()
 
-    assert reward == -1e9
+    assert reward == -1
 
 def test_collision_no_render():
     env = gym.make('driver_planning:car-following-v0')
@@ -34,7 +34,7 @@ def test_collision_no_render():
         total += reward
     env.close()
 
-    assert reward == -1e9
+    assert reward == -1
 
 def test_slow_achieves_goal():
     env = gym.make('driver_planning:car-following-v0')
@@ -61,16 +61,16 @@ def test_stopping_is_punished():
         
     env.close()
 
-    assert reward == -1e5
+    assert reward == -0.5
 
 def test_recorded_observations():
     env = gym.make('driver_planning:car-following-v0')
     env.reset(seed = 0)
 
     actual_observations = []
-    total, done = 0, False
+    total = 0
     for _ in range(10):
-        obs, reward, done, _ = env.step((Acceleration.NEUTRAL, Lateral.STRAIGHT))
+        obs, reward, _, _ = env.step((Acceleration.NEUTRAL, Lateral.STRAIGHT))
         actual_observations.append(obs)
         total += reward
 
@@ -136,6 +136,7 @@ def test_recorded_observations():
                     210),
             'speed': 5},
     ]
+    
+    assert total > 0.01
 
-        
     env.close()
