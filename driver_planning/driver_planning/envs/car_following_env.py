@@ -1,4 +1,3 @@
-from enum import Enum
 import math
 import random
 import time
@@ -194,7 +193,7 @@ class CarFollowingEnv(gym.Env):
     return (SCREEN_WIDTH - self.num_lanes * LANE_WIDTH)/ 2 + lane_id * LANE_WIDTH
 
   def _current_lane(self, x):
-    return int((x - self._lane_left_boundary(0)) / LANE_WIDTH)
+    return math.floor((x - self._lane_left_boundary(0)) / LANE_WIDTH)
 
   def _car_rect(self, car):
     rect = pygame.Rect(0, 00, CAR_WIDTH, CAR_HEIGHT)

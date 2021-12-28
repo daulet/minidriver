@@ -1,15 +1,20 @@
 import time
 
 import gym
-import driver_planning
+import pytest
 
 from .car import MAX_SPEED, Acceleration, Lateral
 
+def gen_seed():
+    # this will get logged when test fails, allowing easy repro
+    return time.time()
+
 # Assert that if actor takes no action (change in acceleration or lateral)
 # than ego hits the other car
-def test_collision():
+@pytest.mark.parametrize('seed', [gen_seed()])
+def test_collision(seed):
     env = gym.make('driver_planning:car-following-v0')
-    env.reset(seed = time.time())
+    env.reset(seed = seed)
     # slow down lead car so we can run into it
     env.agents[1].speed = 1
 
@@ -22,9 +27,10 @@ def test_collision():
 
     assert reward == -1
 
-def test_collision_no_render():
+@pytest.mark.parametrize('seed', [gen_seed()])
+def test_collision_no_render(seed):
     env = gym.make('driver_planning:car-following-v0')
-    env.reset(seed = time.time())
+    env.reset(seed = seed)
      # slow down lead car so we can run into it
     env.agents[1].speed = 1
 
@@ -36,9 +42,10 @@ def test_collision_no_render():
 
     assert reward == -1
 
-def test_slow_achieves_goal():
+@pytest.mark.parametrize('seed', [gen_seed()])
+def test_slow_achieves_goal(seed):
     env = gym.make('driver_planning:car-following-v0')
-    env.reset(seed = time.time())
+    env.reset(seed = seed)
 
     total, done = 0, False
 
@@ -57,9 +64,10 @@ def test_slow_achieves_goal():
 
     assert total > 0
 
-def test_stopping_is_punished():
+@pytest.mark.parametrize('seed', [gen_seed()])
+def test_stopping_is_punished(seed):
     env = gym.make('driver_planning:car-following-v0')
-    env.reset(seed = time.time())
+    env.reset(seed = seed)
     
     for i in range(MAX_SPEED):
         _, reward, _, _ = env.step((Acceleration.SLOW_DOWN, Lateral.STRAIGHT))
@@ -68,9 +76,10 @@ def test_stopping_is_punished():
 
     assert reward == -0.5
 
-def test_off_lane_is_punished():
+@pytest.mark.parametrize('seed', [gen_seed()])
+def test_off_lane_is_punished(seed):
     env = gym.make('driver_planning:car-following-v0')
-    env.reset(seed = time.time())
+    env.reset(seed = seed)
     
     for _ in range(2):
         _, reward, _, _ = env.step((Acceleration.NEUTRAL, Lateral.LEFT))
