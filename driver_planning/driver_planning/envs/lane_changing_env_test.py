@@ -11,7 +11,7 @@ def gen_seed():
 
 @pytest.mark.parametrize('seed', [gen_seed()])
 def test_no_collision(seed):
-    env = gym.make('driver_planning:lane-change-v0')
+    env = gym.make('driver_planning:lane-changing-v0')
     env.reset(seed = seed)
 
     total, done = 0, False
@@ -25,7 +25,7 @@ def test_no_collision(seed):
 
 @pytest.mark.parametrize('seed', [gen_seed()])
 def test_no_collision_no_render(seed):
-    env = gym.make('driver_planning:lane-change-v0')
+    env = gym.make('driver_planning:lane-changing-v0')
     env.reset(seed = seed)
 
     total, done = 0, False
@@ -37,7 +37,7 @@ def test_no_collision_no_render(seed):
     assert 0 < total < 1
 
 def test_recorded_observations():
-    env = gym.make('driver_planning:lane-change-v0')
+    env = gym.make('driver_planning:lane-changing-v0')
     env.reset(seed = 0)
 
     actual_observations = []
@@ -49,16 +49,16 @@ def test_recorded_observations():
         # print(f"{obs},")
 
     assert actual_observations == [
-        {'goal': (-35.0, 255), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, 18, 0), 'speed': 5},
-        {'goal': (-35.0, 250), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, 18, 0), 'speed': 5},
-        {'goal': (-35.0, 245), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, 18, 0), 'speed': 5},
-        {'goal': (-35.0, 240), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, 18, 0), 'speed': 5},
-        {'goal': (-35.0, 235), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, 18, 0), 'speed': 5},
-        {'goal': (-35.0, 230), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, 18, 0), 'speed': 5},
-        {'goal': (-35.0, 225), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, 18, 0), 'speed': 5},
-        {'goal': (-35.0, 220), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, 18, 0), 'speed': 5},
-        {'goal': (-35.0, 215), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, 18, 0), 'speed': 5},
-        {'goal': (-35.0, 210), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, 18, 0), 'speed': 5}
+        {'goal': (-35.0, 255), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, -44, 0), 'speed': 5},
+        {'goal': (-35.0, 250), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, -44, 0), 'speed': 5},
+        {'goal': (-35.0, 245), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, -44, 0), 'speed': 5},
+        {'goal': (-35.0, 240), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, -44, 0), 'speed': 5},
+        {'goal': (-35.0, 235), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, -44, 0), 'speed': 5},
+        {'goal': (-35.0, 230), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, -44, 0), 'speed': 5},
+        {'goal': (-35.0, 225), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, -44, 0), 'speed': 5},
+        {'goal': (-35.0, 220), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, -44, 0), 'speed': 5},
+        {'goal': (-35.0, 215), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, -44, 0), 'speed': 5},
+        {'goal': (-35.0, 210), 'boundaries': (122.5, 52.5), 'dynamic': (-35.0, -44, 0), 'speed': 5},
     ]
 
     assert total > 0.01

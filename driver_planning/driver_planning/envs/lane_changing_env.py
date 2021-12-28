@@ -7,7 +7,7 @@ from gym.utils import seeding
 from .car_following_env import CarFollowingEnv
 from .car_following_env import CAR_HEIGHT, MAX_SPEED
 
-class LaneChangeEnv(CarFollowingEnv):
+class LaneChangingEnv(CarFollowingEnv):
 
   def _title(self):
     return "Lane Changing"

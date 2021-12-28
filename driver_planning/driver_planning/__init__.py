@@ -5,8 +5,8 @@ register(
     entry_point='driver_planning.envs:CarFollowingEnv',
 )
 register(
-    id='lane-change-v0',
-    entry_point='driver_planning.envs:LaneChangeEnv',
+    id='lane-changing-v0',
+    entry_point='driver_planning.envs:LaneChangingEnv',
 )
 register(
     id='turn-right-v0',
