@@ -29,6 +29,6 @@ class LaneChangeEnv(CarFollowingEnv):
 
     return (
       (self._lane_left_boundary(agent_lane) + self._lane_left_boundary(agent_lane+1))/2,
-      random.randint(ego.y - 2*CAR_HEIGHT, ego.y),
+      random.randint(ego.y - 2*CAR_HEIGHT, ego.y + 2*CAR_HEIGHT),
       speed,
     )
