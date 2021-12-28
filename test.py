@@ -38,5 +38,5 @@ def newest(path):
 
 if __name__ == "__main__":
   args = sys.argv[1:]
-  path = len(args) > 0 and args[0] or newest("models")
+  path = len(args) > 0 and args[0] or newest("checkpoints")
   main(path)

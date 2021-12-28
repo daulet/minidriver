@@ -28,7 +28,7 @@ class CarFollowingEnv(gym.Env):
   # (Acceleration, Lateral)
   action_space = spaces.MultiDiscrete([3, 3])
   observation_space = spaces.Dict({
-    "goal":       spaces.Box(low=0,       high=np.inf, shape=(2,), dtype=np.float32),
+    "goal":       spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32),
     "boundaries": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32),
     "dynamic":    spaces.Box(low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32),
     "speed":      spaces.Discrete(MAX_SPEED+1),
@@ -53,7 +53,7 @@ class CarFollowingEnv(gym.Env):
     lb = self._lane_left_boundary(0)
     rb = self._lane_left_boundary(self.num_lanes)
     return {
-      "goal":       (abs(ego.x-gx), abs(ego.y-gy)), # distance to goal;
+      "goal":       (ego.x-gx, ego.y-gy), # distance to goal;
       "boundaries": (ego.x-lb, rb-ego.x),           # (left, right) distance to road boundaries;
       # TODO fix shape of this box to allow multiple distances
       "dynamic":    distances[0],                      # distances to dynamic agents; 

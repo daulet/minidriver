@@ -1,5 +1,6 @@
-# model checkpoints
-solutions/
+# training artifacts
+checkpoints/
+tensorboard/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
