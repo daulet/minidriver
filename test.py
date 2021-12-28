@@ -5,15 +5,19 @@ import time
 import gym
 from stable_baselines3 import PPO
 
-def main(path):
-  print("Loading model from", path)
-  model = PPO.load(path)
+def main(env_name, path):
+  model = get_model(path)
   print("Testing model...")
-  test(model, rounds=100) 
+  test(env_name, model, rounds=100) 
 
 
-def test(model, rounds=10):
-  env = gym.make("driver_planning:car-following-v0", debug=True)
+def get_model(path):
+  print("Loading model from", path)
+  return PPO.load(path)
+
+
+def test(env_name, model, rounds=10):
+  env = gym.make(env_name, debug=True)
   
   wins = 0
   for i in range(rounds):
@@ -38,5 +42,7 @@ def newest(path):
 
 if __name__ == "__main__":
   args = sys.argv[1:]
-  path = len(args) > 0 and args[0] or newest("checkpoints")
-  main(path)
+  assert len(args) > 0, "Usage: python test.py <env-name> [<path-to-model>]"
+  env_name = args[0]
+  path = len(args) > 1 and args[1] or newest("checkpoints")
+  main(f"driver_planning:{env_name}-v0", path)
