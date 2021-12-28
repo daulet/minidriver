@@ -1,23 +1,34 @@
+import random
 from typing import Optional
-import gym
+
 from gym import error, spaces, utils
 from gym.utils import seeding
 
-class LaneChangeEnv(gym.Env):
-  metadata = {'render.modes': ['human']}
+from .car_following_env import CarFollowingEnv
+from .car_following_env import CAR_HEIGHT, MAX_SPEED
 
-  def __init__(self):
-    pass
+class LaneChangeEnv(CarFollowingEnv):
 
-  def step(self, action):
-    pass
+  def _title(self):
+    return "Lane Changing"
 
-  def reset(self):
-    super().reset()
-    pass
+  def _num_lanes(self):
+    return random.randint(2, 5)
 
-  def render(self, mode='human'):
-    pass
+  def _goal_position(self, ego):
+    ego_lane = self._current_lane(ego.x)
+    adj_lanes = set([ego_lane-1, ego_lane+1]) - set([-1, self.num_lanes])
+    goal_lane = random.choice(list(adj_lanes))
+    return (self._lane_left_boundary(goal_lane) + self._lane_left_boundary(goal_lane+1))/2, 0
 
-  def close(self):
-    pass
+  def _agent_position(self, goal, ego):
+    speed = random.randint(1, MAX_SPEED)
+
+    gx, _ = goal
+    agent_lane = self._current_lane(gx)
+
+    return (
+      (self._lane_left_boundary(agent_lane) + self._lane_left_boundary(agent_lane+1))/2,
+      random.randint(ego.y - 2*CAR_HEIGHT, ego.y),
+      speed,
+    )

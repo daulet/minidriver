@@ -138,32 +138,21 @@ class CarFollowingEnv(gym.Env):
     self.steps = 0
     self.rewards = 0
 
-    self.num_lanes = random.randint(3, 5)
+    self.num_lanes = self._num_lanes()
+
     ego_lane = random.randint(0, self.num_lanes-1)
-
-    self.goal = ((self._lane_left_boundary(ego_lane) + self._lane_left_boundary(ego_lane+1))/2, 0)
-
     ego = Car(0,
             (self._lane_left_boundary(ego_lane) + self._lane_left_boundary(ego_lane+1))/2,
             random.randint(SCREEN_HEIGHT/2, SCREEN_HEIGHT - CAR_HEIGHT),
             5, # faster so it can catch up to car ahead if no action
           )
     self.agents = [ego]
-    
-    time_till_offscreen = ego.y // ego.speed
 
+    self.goal = self._goal_position(ego)
+    
     for idx in range(1, 2):
-      speed = random.randint(1, MAX_SPEED)
-      away_from_ego = CAR_HEIGHT
-      for s in range(ego.speed-speed+1):
-        away_from_ego += s
-      self.agents.append(
-        Car(idx,
-          (self._lane_left_boundary(ego_lane) + self._lane_left_boundary(ego_lane+1))/2,
-          random.randint(time_till_offscreen+1, ego.y-away_from_ego), # ahead of ego
-          speed,
-        )
-      )
+      x, y, speed = self._agent_position(self.goal, ego)
+      self.agents.append(Car(idx, x, y, speed))
     return self._state()
 
 
@@ -171,7 +160,7 @@ class CarFollowingEnv(gym.Env):
     
     if self.surface is None:
       pygame.init()
-      pygame.display.set_caption("Car Following")
+      pygame.display.set_caption(self._title())
       self.surface = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
     
     self.surface.fill((255, 255, 255))
@@ -212,3 +201,29 @@ class CarFollowingEnv(gym.Env):
     if self.surface:
       self.surface = None
       pygame.quit()
+
+  def _title(self):
+    return "Car Following"
+
+  def _num_lanes(self):
+    return random.randint(1, 5)
+
+  def _goal_position(self, ego):
+    ego_lane = self._current_lane(ego.x)
+    return (self._lane_left_boundary(ego_lane) + self._lane_left_boundary(ego_lane+1))/2, 0
+
+  def _agent_position(self, goal, ego):
+    speed = random.randint(1, MAX_SPEED)
+
+    time_till_offscreen = ego.y // ego.speed
+    away_from_ego = CAR_HEIGHT
+    for s in range(ego.speed-speed+1):
+      away_from_ego += s
+
+    ego_lane = self._current_lane(ego.x)
+
+    return (
+      (self._lane_left_boundary(ego_lane) + self._lane_left_boundary(ego_lane+1))/2,
+      random.randint(time_till_offscreen+1, ego.y-away_from_ego), # ahead of ego
+      speed,
+    )
