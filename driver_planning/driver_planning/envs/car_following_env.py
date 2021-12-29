@@ -62,6 +62,8 @@ class CarFollowingEnv(gym.Env):
 
   def step(self, action):
     self.steps += 1
+    prev_act = self.prev_act
+    self.prev_act = action
 
     accel, lat = action
     done = False
@@ -106,14 +108,16 @@ class CarFollowingEnv(gym.Env):
     if not done:
       if ego.x < self._lane_left_boundary(0) or ego.x > self._lane_left_boundary(self.num_lanes):
         reward = -0.5
+      elif ego.speed == 0:
+        reward = -0.5
       # if not driving in a lane
       elif self._current_lane(ego.x-CAR_WIDTH/2) != self._current_lane(ego.x+CAR_WIDTH/2):
         reward = 0 # negative reward encourages delaying lane changing due to reward decay
-      elif ego.speed == 0:
-        reward = -0.5
       elif ego_rect.collidepoint(*self.goal):
         reward = 1
         done = True
+      elif prev_act is not None and not np.array_equal(prev_act, action):
+        reward = 0
       else:
         reward = 0.001 # incentivize movement
 
@@ -137,6 +141,7 @@ class CarFollowingEnv(gym.Env):
 
     self.steps = 0
     self.rewards = 0
+    self.prev_act = None
 
     self.num_lanes = self._num_lanes()
 
