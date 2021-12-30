@@ -32,6 +32,14 @@ class CarFollowingEnv(gym.Env):
     "dynamic":    spaces.Box(low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32),
     "speed":      spaces.Discrete(MAX_SPEED+1),
   })
+  agent_colors = [
+    (  0, 128,   0), # Green
+    (  0,   0, 128), # Navy
+    (128,   0,   0), # Maroon
+  	(128, 128,   0), # Olive
+  	(128,   0, 128), # Purple
+  	(  0, 128, 128), # Teal
+  ]
 
   def __init__(self, debug=False):
     self.surface = None
@@ -41,14 +49,17 @@ class CarFollowingEnv(gym.Env):
       self._print = lambda *args: None
 
 
-  def _state(self):
-    ego = self.agents[0]
+  def _state(self, agent_id):
+    ego = self.agents[agent_id]
     distances = []
-    for i in range(1, len(self.agents)):
+    for i in range(len(self.agents)):
+      if i == agent_id:
+        continue
       car = self.agents[i]
       distances.append((ego.x - car.x, ego.y - car.y, ego.speed - car.speed))
 
-    gx, gy = self.goal
+    assert self.goals[agent_id] is not None, "Can't generate observation for an agent without controller"
+    gx, gy = self.goals[agent_id]
     lb = self._lane_left_boundary(0)
     rb = self._lane_left_boundary(self.num_lanes)
     return {
@@ -66,6 +77,7 @@ class CarFollowingEnv(gym.Env):
     self.prev_act = action
 
     accel, lat = action
+    ego_id = 0
     done = False
 
     #
@@ -81,12 +93,13 @@ class CarFollowingEnv(gym.Env):
       car.step()
 
     if ego.y < 0 or ego.y > SCREEN_HEIGHT:
+      # TODO might need to be revisited with multiple controls
       done = True
 
     #
     # Observation
     #
-    states = self._state()
+    states = self._state(agent_id=ego_id)
 
     #
     # Reward
@@ -113,8 +126,9 @@ class CarFollowingEnv(gym.Env):
       # if not driving in a lane
       elif self._current_lane(ego.x-CAR_WIDTH/2) != self._current_lane(ego.x+CAR_WIDTH/2):
         reward = 0 # negative reward encourages delaying lane changing due to reward decay
-      elif ego_rect.collidepoint(*self.goal):
+      elif ego_rect.collidepoint(*self.goals[ego_id]):
         reward = 1
+        # TODO might need to be revisited with multiple goals
         done = True
       elif prev_act is not None and not np.array_equal(prev_act, action):
         reward = 0
@@ -152,13 +166,14 @@ class CarFollowingEnv(gym.Env):
             random.randint(1, MAX_SPEED),
           )
     self.agents = [ego]
-
-    self.goal = self._goal_position(ego)
+    self.goals = [self._goal_position(ego)]
     
     for idx in range(1, 2):
-      x, y, speed = self._agent_position(self.goal, ego)
+      x, y, speed = self._agent_position(self.goals[0], self.agents[0])
       self.agents.append(Car(idx, x, y, speed))
-    return self._state()
+      self.goals.append(None)
+    assert len(self.agents) == len(self.goals)
+    return self._state(agent_id=0)
 
 
   def render(self, mode='human', fps=FPS):
@@ -176,9 +191,13 @@ class CarFollowingEnv(gym.Env):
         color = (255, 255, 0)
       pygame.draw.line(self.surface, color, (lane_x, 0), (lane_x, SCREEN_HEIGHT), LANE_LINE_WIDTH)
 
-    goal_rect = pygame.Rect(0, 0, CAR_WIDTH, CAR_HEIGHT)
-    goal_rect.center = self.goal
-    pygame.draw.rect(self.surface, (0, 255, 0), goal_rect, width=3)
+    for idx, goal in enumerate(self.goals):
+      if goal is None:
+        continue
+      goal_rect = pygame.Rect(0, 0, CAR_WIDTH, CAR_HEIGHT)
+      goal_rect.center = goal
+      pygame.draw.rect(self.surface, CarFollowingEnv.agent_colors[idx], goal_rect, width=3)
+
     for agent in self.agents:
       self._render_car(agent)
 
@@ -197,11 +216,10 @@ class CarFollowingEnv(gym.Env):
     rect.center = (car.x, car.y)
     return rect
 
-  def _render_car(self, car):
-    rect = self._car_rect(car)
-    color = (0, 0, 255)
-    if car.id == 0: # ID 0 is Ego
-      color = (0, 255, 0)
+  def _render_car(self, agent):
+    assert agent.id < len(self.agent_colors), "Add more agent colors"
+    rect = self._car_rect(agent)
+    color = CarFollowingEnv.agent_colors[agent.id]
     pygame.draw.rect(self.surface, color, rect)
 
 
@@ -216,9 +234,9 @@ class CarFollowingEnv(gym.Env):
   def _num_lanes(self):
     return random.randint(1, 5)
 
-  def _goal_position(self, ego):
-    ego_lane = self._current_lane(ego.x)
-    return (self._lane_left_boundary(ego_lane) + self._lane_left_boundary(ego_lane+1))/2, 0
+  def _goal_position(self, agent):
+    agent_lane = self._current_lane(agent.x)
+    return (self._lane_left_boundary(agent_lane) + self._lane_left_boundary(agent_lane+1))/2, 0
 
   def _agent_position(self, goal, ego):
     speed = random.randint(1, MAX_SPEED)
