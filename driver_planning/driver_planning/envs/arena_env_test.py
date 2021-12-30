@@ -48,7 +48,18 @@ def test_reset(seed):
     c2, g2 = env.controllers, env.goals
     assert c1 == c2
     assert g1 == g2
-    
+
+@pytest.mark.parametrize('seed', [gen_seed()])
+def test_spawn_point(seed):
+    controllers = [FakeController()]
+    env = gym.make('driver_planning:arena-v0', controllers=controllers)
+    env.action_space.seed(seed=int(seed))
+    env.reset(seed = seed)
+
+    assert len(env.agents) >= 2
+    r1, r2 = env._car_rect(env.agents[0]), env._car_rect(env.agents[1])
+    assert not r1.colliderect(r2)
+
 def test_recorded_observations():
     controllers = [FakeController()]
     env = gym.make('driver_planning:arena-v0', controllers=controllers)
@@ -64,16 +75,16 @@ def test_recorded_observations():
         # print(f"{obs},")
 
     assert actual_observations == [
-        {'goal': (-35.0, 257), 'boundaries': (122.5, 52.5), 'dynamic': (-5.0, -189, -1), 'speed': 3},
-        {'goal': (-35.0, 254), 'boundaries': (122.5, 52.5), 'dynamic': (-5.0, -189, 0), 'speed': 3}, 
-        {'goal': (-35.0, 251), 'boundaries': (122.5, 52.5), 'dynamic': (-10.0, -189, 0), 'speed': 3},
-        {'goal': (-35.0, 248), 'boundaries': (122.5, 52.5), 'dynamic': (-15.0, -190, 1), 'speed': 3},
-        {'goal': (-35.0, 245), 'boundaries': (122.5, 52.5), 'dynamic': (-10.0, -191, 1), 'speed': 3},
-        {'goal': (-35.0, 242), 'boundaries': (122.5, 52.5), 'dynamic': (-15.0, -192, 1), 'speed': 3},
-        {'goal': (-35.0, 239), 'boundaries': (122.5, 52.5), 'dynamic': (-10.0, -194, 2), 'speed': 3},
-        {'goal': (-35.0, 236), 'boundaries': (122.5, 52.5), 'dynamic': (-15.0, -195, 1), 'speed': 3},
-        {'goal': (-35.0, 233), 'boundaries': (122.5, 52.5), 'dynamic': (-20.0, -197, 2), 'speed': 3},
-        {'goal': (-35.0, 230), 'boundaries': (122.5, 52.5), 'dynamic': (-25.0, -199, 2), 'speed': 3},  
+        {'goal': (-35.0, 257), 'boundaries': (122.5, 52.5), 'dynamic': (-5.0, -117, -1), 'speed': 3},
+        {'goal': (-35.0, 254), 'boundaries': (122.5, 52.5), 'dynamic': (-5.0, -117, 0), 'speed': 3}, 
+        {'goal': (-35.0, 251), 'boundaries': (122.5, 52.5), 'dynamic': (-10.0, -117, 0), 'speed': 3},
+        {'goal': (-35.0, 248), 'boundaries': (122.5, 52.5), 'dynamic': (-15.0, -118, 1), 'speed': 3},
+        {'goal': (-35.0, 245), 'boundaries': (122.5, 52.5), 'dynamic': (-10.0, -119, 1), 'speed': 3},
+        {'goal': (-35.0, 242), 'boundaries': (122.5, 52.5), 'dynamic': (-15.0, -120, 1), 'speed': 3},
+        {'goal': (-35.0, 239), 'boundaries': (122.5, 52.5), 'dynamic': (-10.0, -122, 2), 'speed': 3},
+        {'goal': (-35.0, 236), 'boundaries': (122.5, 52.5), 'dynamic': (-15.0, -123, 1), 'speed': 3},
+        {'goal': (-35.0, 233), 'boundaries': (122.5, 52.5), 'dynamic': (-20.0, -125, 2), 'speed': 3},
+        {'goal': (-35.0, 230), 'boundaries': (122.5, 52.5), 'dynamic': (-25.0, -127, 2), 'speed': 3},
     ]
 
     assert total > 0.01
