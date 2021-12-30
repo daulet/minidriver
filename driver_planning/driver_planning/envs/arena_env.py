@@ -5,11 +5,6 @@ from .car_following_env import CAR_HEIGHT, MAX_SPEED, SCREEN_HEIGHT
 
 class ArenaEnv(CarFollowingEnv):
 
-    # TODO handle no controllers
-    def __init__(self, controllers=None, **kwargs):
-        super().__init__(**kwargs)
-        self.controllers = controllers
-
     def _title(self):
         return "Arena"
 

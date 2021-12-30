@@ -41,8 +41,10 @@ class CarFollowingEnv(gym.Env):
   	(  0, 128, 128), # Teal
   ]
 
-  def __init__(self, debug=False):
+  def __init__(self, controllers=[], debug=False):
     self.surface = None
+    # first controller is for ego
+    self.controllers = [None] + controllers
     if debug:
       self._print = print
     else:
@@ -76,15 +78,23 @@ class CarFollowingEnv(gym.Env):
     prev_act = self.prev_act
     self.prev_act = action
 
-    accel, lat = action
-    ego_id = 0
     done = False
+
+    actions = [None] * len(self.agents)
+    actions[0] = action
+    for idx, controller in enumerate(self.controllers):
+      if controller is None:
+        continue
+      obs = self._state(agent_id=idx)
+      actions[idx] = controller.act(obs)
 
     #
     # Action
     #
-    ego = self.agents[0]
-    ego.update(accel, lat)
+    for idx, act in enumerate(actions):
+      if act is None:
+        continue
+      self.agents[idx].update(*act)
 
     #
     # Update
@@ -92,17 +102,17 @@ class CarFollowingEnv(gym.Env):
     for car in self.agents:
       car.step()
 
+    #
+    # Rewards
+    #
+    ego_id = 0
+    ego = self.agents[ego_id]
     if ego.y < 0 or ego.y > SCREEN_HEIGHT:
       # TODO might need to be revisited with multiple controls
       done = True
 
     #
-    # Observation
-    #
-    states = self._state(agent_id=ego_id)
-
-    #
-    # Reward
+    # Rewards:
     # hitting a car: -1.0
     # complete stop: -0.5
     # going off road: -0.5
@@ -145,7 +155,7 @@ class CarFollowingEnv(gym.Env):
       else:
         self._print(f"{bcolors.FAIL}[FAILED]\tsteps: {self.steps},\treward: {self.rewards:7.3f}{bcolors.ENDC}")
 
-    return states, reward , done, {} # observation, reward, done, info
+    return self._state(agent_id=ego_id), reward , done, {} # observation, reward, done, info
 
 
   def reset(self, seed=None):
@@ -170,9 +180,14 @@ class CarFollowingEnv(gym.Env):
     
     for idx in range(1, 2):
       x, y, speed = self._agent_position(self.goals[0], self.agents[0])
-      self.agents.append(Car(idx, x, y, speed))
-      self.goals.append(None)
-    assert len(self.agents) == len(self.goals)
+      agent = Car(idx, x, y, speed)
+      self.agents.append(agent)
+      if len(self.controllers) > idx:
+        self.goals.append(self._goal_position(agent))
+      else:
+        self.controllers.append(None)
+        self.goals.append(None)
+    assert len(self.agents) == len(self.goals) == len(self.controllers)
     return self._state(agent_id=0)
 
 
