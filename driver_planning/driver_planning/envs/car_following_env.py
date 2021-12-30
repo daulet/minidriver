@@ -149,7 +149,7 @@ class CarFollowingEnv(gym.Env):
     ego = Car(0,
             (self._lane_left_boundary(ego_lane) + self._lane_left_boundary(ego_lane+1))/2,
             random.randint(SCREEN_HEIGHT/2, SCREEN_HEIGHT - CAR_HEIGHT),
-            5, # faster so it can catch up to car ahead if no action
+            random.randint(1, MAX_SPEED),
           )
     self.agents = [ego]
 
@@ -223,7 +223,7 @@ class CarFollowingEnv(gym.Env):
   def _agent_position(self, goal, ego):
     speed = random.randint(1, MAX_SPEED)
 
-    time_till_offscreen = ego.y // ego.speed
+    time_till_offscreen = ego.y // MAX_SPEED
     away_from_ego = CAR_HEIGHT
     for s in range(ego.speed-speed+1):
       away_from_ego += s
