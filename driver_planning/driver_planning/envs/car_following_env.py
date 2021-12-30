@@ -176,6 +176,9 @@ class CarFollowingEnv(gym.Env):
         color = (255, 255, 0)
       pygame.draw.line(self.surface, color, (lane_x, 0), (lane_x, SCREEN_HEIGHT), LANE_LINE_WIDTH)
 
+    goal_rect = pygame.Rect(0, 0, CAR_WIDTH, CAR_HEIGHT)
+    goal_rect.center = self.goal
+    pygame.draw.rect(self.surface, (0, 255, 0), goal_rect, width=3)
     for agent in self.agents:
       self._render_car(agent)
 
@@ -190,7 +193,7 @@ class CarFollowingEnv(gym.Env):
     return math.floor((x - self._lane_left_boundary(0)) / LANE_WIDTH)
 
   def _car_rect(self, car):
-    rect = pygame.Rect(0, 00, CAR_WIDTH, CAR_HEIGHT)
+    rect = pygame.Rect(0, 0, CAR_WIDTH, CAR_HEIGHT)
     rect.center = (car.x, car.y)
     return rect
 
