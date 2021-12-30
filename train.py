@@ -8,6 +8,7 @@ from test import test
 ITERATION = 1e5
 arch = [64, 64, 64]
 batch_size = 256
+gamma = 0.999
 learning_rate = 1e-3
 seed = int(time.time())
 
@@ -21,14 +22,15 @@ model = PPO(
   verbose=1,
   policy_kwargs={"net_arch":arch},
   batch_size=batch_size,
+  gamma=gamma,
   learning_rate=learning_rate,
   seed=seed,
-  tensorboard_log=f"./tensorboard/{env_name}_ppo_arch{'-'.join(map(str, arch))}_batch{batch_size}_lr{learning_rate}/",
+  tensorboard_log=f"./tensorboard/{env_name}_ppo_arch{'-'.join(map(str, arch))}_batch{batch_size}_g{gamma}_lr{learning_rate}/",
 )
 
 timesteps = 0
 while True:
   model.learn(total_timesteps=ITERATION, reset_num_timesteps=False)
   timesteps+=ITERATION
-  model.save(f"./checkpoints/{env_name}_ppo_arch{'-'.join(map(str, arch))}_batch{batch_size}_lr{learning_rate}_{timesteps}")
+  model.save(f"./checkpoints/{env_name}_ppo_arch{'-'.join(map(str, arch))}_batch{batch_size}_g{gamma}_lr{learning_rate}_{timesteps}")
   test(full_env_name, model)
