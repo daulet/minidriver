@@ -1,2 +1,3 @@
+from driver_planning.envs.arena_env import ArenaEnv
 from driver_planning.envs.car_following_env import CarFollowingEnv
 from driver_planning.envs.lane_changing_env import LaneChangingEnv

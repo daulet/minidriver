@@ -1,6 +1,10 @@
 from gym.envs.registration import register
 
 register(
+    id='arena-v0',
+    entry_point="driver_planning.envs:ArenaEnv",
+)
+register(
     id='car-following-v0',
     entry_point='driver_planning.envs:CarFollowingEnv',
 )
