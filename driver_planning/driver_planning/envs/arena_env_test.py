@@ -37,6 +37,18 @@ def test_consistency(seed):
 
         prev_obs, _, _, _ = env.step((Acceleration.NEUTRAL, Lateral.STRAIGHT))
 
+@pytest.mark.parametrize('seed', [gen_seed()])
+def test_reset(seed):
+    env = gym.make('driver_planning:arena-v0', controllers=[])
+    env.action_space.seed(seed=int(seed))
+    
+    env.reset(seed=seed)
+    c1, g1 = env.controllers, env.goals
+    env.reset(seed=seed)
+    c2, g2 = env.controllers, env.goals
+    assert c1 == c2
+    assert g1 == g2
+    
 def test_recorded_observations():
     controllers = [FakeController()]
     env = gym.make('driver_planning:arena-v0', controllers=controllers)

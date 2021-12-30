@@ -181,14 +181,18 @@ class CarFollowingEnv(gym.Env):
     self.goals = [self._goal_position(ego)]
     
     for idx in range(1, 2):
+      if len(self.controllers) <= idx:
+        self.controllers.append(None)
+
       x, y, speed = self._agent_position(self.goals[0], self.agents[0])
       agent = Car(idx, x, y, speed)
       self.agents.append(agent)
-      if len(self.controllers) > idx:
-        self.goals.append(self._goal_position(agent))
-      else:
-        self.controllers.append(None)
+
+      if self.controllers[idx] is None:
         self.goals.append(None)
+      else:
+        self.goals.append(self._goal_position(agent))
+
     assert len(self.agents) == len(self.goals) == len(self.controllers)
     return self._state(agent_id=0)
 
