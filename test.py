@@ -16,8 +16,8 @@ def get_model(path):
   return PPO.load(path)
 
 
-def test(env_name, model, rounds=10):
-  env = gym.make(env_name, debug=True)
+def test(env_name, model, rounds=10, controllers=None):
+  env = gym.make(env_name, debug=True, controllers=controllers)
   
   wins = 0
   for i in range(rounds):

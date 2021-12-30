@@ -41,8 +41,10 @@ class CarFollowingEnv(gym.Env):
   	(  0, 128, 128), # Teal
   ]
 
-  def __init__(self, controllers=[], debug=False):
+  def __init__(self, controllers=None, debug=False):
     self.surface = None
+    if controllers is None:
+      controllers = []
     # first controller is for ego
     self.controllers = [None] + controllers
     if debug:
