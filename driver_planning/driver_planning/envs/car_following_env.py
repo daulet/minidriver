@@ -208,6 +208,8 @@ class CarFollowingEnv(gym.Env):
       pygame.display.set_caption(self._title())
       self.surface = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
     
+    pygame.event.get()
+
     self.surface.fill((255, 255, 255))
     for lane_id in range(self.num_lanes+1):
       lane_x = self._lane_left_boundary(lane_id)
