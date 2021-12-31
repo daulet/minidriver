@@ -7,7 +7,8 @@ from stable_baselines3.common.env_util import make_vec_env
 from test import test
 
 def train(env_name):
-  ITERATION = 1e5
+  ITERATION = 10**5
+  LIMIT = 10**7
   arch = [64, 64, 64]
   batch_size = 256
   gamma = 0.999
@@ -26,13 +27,15 @@ def train(env_name):
     gamma=gamma,
     learning_rate=learning_rate,
     seed=seed,
-    tensorboard_log=f"./tensorboard/{env_name}_ppo_arch{'-'.join(map(str, arch))}_batch{batch_size}_g{gamma}_lr{learning_rate}/",
+    tensorboard_log=f"./tensorboard/{env_name}_ppo/",
   )
 
-  timesteps = 0
-  while True:
-    model.learn(total_timesteps=ITERATION, reset_num_timesteps=False)
-    timesteps+=ITERATION
+  for timesteps in range(ITERATION, LIMIT+1, ITERATION):
+    model.learn(
+      total_timesteps=ITERATION,
+      reset_num_timesteps=False,
+      tb_log_name=f"arch{'-'.join(map(str, arch))}_batch{batch_size}_g{gamma}_lr{learning_rate}",
+    )
     model.save(f"./checkpoints/{env_name}_ppo_arch{'-'.join(map(str, arch))}_batch{batch_size}_g{gamma}_lr{learning_rate}_{timesteps}")
     test(full_env_name, model)
 
