@@ -19,7 +19,7 @@ def get_model(path):
 def test(env_name, model, rounds=10, controllers=None):
   env = gym.make(env_name, debug=True, controllers=controllers)
   
-  wins = 0
+  failures, neutral, successes = 0, 0, 0
   for i in range(rounds):
     obs, rew = env.reset(seed=time.time()), 0
     done = False
@@ -28,8 +28,13 @@ def test(env_name, model, rounds=10, controllers=None):
       obs, reward, done, info = env.step(action)
       rew += reward
       env.render(fps=240)
-    wins += rew > 0.5
-  print(f"Wins: {wins}/{rounds}")
+    if env._collided:
+      failures += 1
+    elif env._goal_reached:
+      successes += 1
+    else:
+      neutral += 1
+  print(f"Success/Neutral/Failures: {successes}/{neutral}/{failures}")
   env.close()
 
 

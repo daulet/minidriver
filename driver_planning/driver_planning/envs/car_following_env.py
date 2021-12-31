@@ -126,6 +126,7 @@ class CarFollowingEnv(gym.Env):
     for i in range(1, len(self.agents)):
       agent_rect = self._car_rect(self.agents[i])
       if ego_rect.colliderect(agent_rect):
+        self._collided = True
         reward = -1
         done = True
         break
@@ -152,11 +153,12 @@ class CarFollowingEnv(gym.Env):
       done = True
     self.rewards += reward
     if done:
-      if reward == 1:
+      if self._collided:
+        self._print(f"{bcolors.FAIL}[FAILED]\tsteps: {self.steps},\treward: {self.rewards:7.3f}{bcolors.ENDC}")
+      elif self._goal_reached:
         self._print(f"{bcolors.OKGREEN}[SUCCESS]\tsteps: {self.steps},\treward: {self.rewards:7.3f}{bcolors.ENDC}")
       else:
-        self._print(f"{bcolors.FAIL}[FAILED]\tsteps: {self.steps},\treward: {self.rewards:7.3f}{bcolors.ENDC}")
-
+        self._print(f"{bcolors.WARNING}[NO CRASH]\tsteps: {self.steps},\treward: {self.rewards:7.3f}{bcolors.ENDC}")
     return self._state(agent_id=ego_id), reward , done, {} # observation, reward, done, info
 
 
@@ -165,6 +167,8 @@ class CarFollowingEnv(gym.Env):
       seed = time.time()
     random.seed(seed)
 
+    self._goal_reached = False
+    self._collided = False
     self.steps = 0
     self.rewards = 0
     self.prev_act = None

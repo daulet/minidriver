@@ -49,6 +49,12 @@ def test_reset(seed):
     assert c1 == c2
     assert g1 == g2
 
+    env._goal_reached = True
+    env._collided = True
+    env.reset(seed=seed)
+    assert not env._goal_reached
+    assert not env._collided
+
 @pytest.mark.parametrize('seed', [gen_seed()])
 def test_spawn_point(seed):
     controllers = [FakeController()]
