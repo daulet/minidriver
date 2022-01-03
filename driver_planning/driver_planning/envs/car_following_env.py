@@ -138,8 +138,9 @@ class CarFollowingEnv(gym.Env):
         reward = -0.5
       # if not driving in a lane
       elif self._current_lane(ego.x-CAR_WIDTH/2) != self._current_lane(ego.x+CAR_WIDTH/2):
-        reward = 0 # negative reward encourages delaying lane changing due to reward decay
+        reward = -0.001 # has to be lower than changing direction
       elif ego_rect.collidepoint(*self.goals[ego_id]):
+        self._goal_reached = True
         reward = 1
         # TODO might need to be revisited with multiple goals
         done = True
