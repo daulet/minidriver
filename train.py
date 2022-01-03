@@ -1,5 +1,7 @@
+import io
 import sys
 import time
+from driver_planning.controller import Controller
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
@@ -11,13 +13,15 @@ def train(env_name):
   LIMIT = 10**7
   arch = [64, 64, 64]
   batch_size = 256
-  gamma = 0.999
+  gamma = 0.99
   learning_rate = 1e-3
   seed = int(time.time())
+  self_play = 0.2
 
   full_env_name = f"driver_planning:{env_name}-v0"
 
-  env = make_vec_env(full_env_name, n_envs=16, seed=seed)
+  controller = Controller(None, self_play=self_play)
+  env = make_vec_env(full_env_name, n_envs=16, seed=seed, env_kwargs={'controllers':[controller]})
   model = PPO(
     "MultiInputPolicy",
     env,
@@ -31,13 +35,25 @@ def train(env_name):
   )
 
   for timesteps in range(ITERATION, LIMIT+1, ITERATION):
+    if self_play > 0.0:
+      with io.BytesIO() as bytes:
+        with io.BufferedRandom(bytes) as buffer:
+          print("Cloning model for self-play...")
+          model.save(buffer)
+          clone = PPO.load(buffer)
+          controller.update(clone)
+
+    print(f"Training model for {ITERATION} timesteps ({timesteps} total)")
     model.learn(
       total_timesteps=ITERATION,
       reset_num_timesteps=False,
-      tb_log_name=f"arch{'-'.join(map(str, arch))}_batch{batch_size}_g{gamma}_lr{learning_rate}",
+      tb_log_name=f"arch{'-'.join(map(str, arch))}_batch{batch_size}_g{gamma}_lr{learning_rate}_sp{self_play}",
     )
-    model.save(f"./checkpoints/{env_name}_ppo_arch{'-'.join(map(str, arch))}_batch{batch_size}_g{gamma}_lr{learning_rate}_{timesteps}")
-    test(full_env_name, model)
+
+    path = f"./checkpoints/{env_name}_ppo_arch{'-'.join(map(str, arch))}_batch{batch_size}_g{gamma}_lr{learning_rate}_sp{self_play}_{timesteps}"
+    print(f"Saving to {path}")
+    model.save(path)
+    test(full_env_name, model, render=False, rounds=20)
 
 
 if __name__ == "__main__":

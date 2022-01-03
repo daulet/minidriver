@@ -195,6 +195,7 @@ class CarFollowingEnv(gym.Env):
       if self.controllers[idx] is None:
         self.goals.append(None)
       else:
+        self.controllers[idx].reset()
         self.goals.append(self._goal_position(agent))
 
     assert len(self.agents) == len(self.goals) == len(self.controllers)

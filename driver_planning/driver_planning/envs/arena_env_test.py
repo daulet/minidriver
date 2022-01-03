@@ -7,6 +7,9 @@ import pytest
 from .car import Acceleration, Lateral
 
 class FakeController(object):
+    def reset(self):
+        pass
+
     def act(self, obs):
         return ArenaEnv.action_space.sample()
 

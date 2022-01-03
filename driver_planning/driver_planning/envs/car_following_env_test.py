@@ -83,11 +83,11 @@ def test_off_lane_is_punished(seed):
     
     for _ in range(2):
         _, reward, _, _ = env.step((Acceleration.NEUTRAL, Lateral.LEFT))
-    assert reward == 0
+    assert reward == -0.001
 
     for _ in range(4):
         _, reward, _, _ = env.step((Acceleration.NEUTRAL, Lateral.RIGHT))
-    assert reward == 0
+    assert reward == -0.001
 
     env.close()
 
