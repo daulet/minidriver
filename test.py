@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 import time
@@ -5,18 +6,13 @@ import time
 import gym
 from stable_baselines3 import PPO
 
-def main(env_name, path):
-  model = get_model(path)
-  print("Testing model...")
-  test(env_name, model, rounds=100) 
-
 
 def get_model(path):
   print("Loading model from", path)
   return PPO.load(path)
 
 
-def test(env_name, model, rounds=10, controllers=None):
+def test(env_name, model, controllers=None, render=False, rounds=10):
   env = gym.make(env_name, debug=True, controllers=controllers)
   
   failures, neutral, successes = 0, 0, 0
@@ -27,7 +23,8 @@ def test(env_name, model, rounds=10, controllers=None):
       action, _states = model.predict(obs, deterministic=True)
       obs, reward, done, info = env.step(action)
       rew += reward
-      env.render(fps=240)
+      if render:
+        env.render(fps=240)
     if env._collided:
       failures += 1
     elif env._goal_reached:
@@ -46,8 +43,16 @@ def newest(path):
 
 
 if __name__ == "__main__":
-  args = sys.argv[1:]
-  assert len(args) > 0, "Usage: python test.py <env-name> [<path-to-model>]"
-  env_name = args[0]
-  path = len(args) > 1 and args[1] or newest("checkpoints")
-  main(f"driver_planning:{env_name}-v0", path)
+  parser = argparse.ArgumentParser(description='Evaluate model in specified environment.')
+  parser.add_argument('env_name', type=str, help='Environment name')
+  parser.add_argument('--fast', default=False, action='store_true', help='Skip rendering.')
+  parser.add_argument('--path', type=str, default=None, help='Path to model.')
+  parser.add_argument('--rounds', type=int, default=100, help='Number of rounds to test.')
+  args = parser.parse_args()
+
+  if args.path is None:
+    args.path = newest("checkpoints")
+
+  model = get_model(args.path)
+  print("Testing model...")
+  test(f"driver_planning:{args.env_name}-v0", model, render=not args.fast, rounds=args.rounds) 
