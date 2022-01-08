@@ -1,5 +1,5 @@
+import argparse
 import io
-import sys
 import time
 from driver_planning.controller import Controller
 
@@ -8,15 +8,15 @@ from stable_baselines3.common.env_util import make_vec_env
 
 from test import test
 
-def train(env_name):
-  ITERATION = 10**5
+def train(env_name, render):
+  ITERATION = 10**6
   LIMIT = 10**7
   arch = [64, 64, 64]
   batch_size = 256
   gamma = 0.99
   learning_rate = 1e-3
   seed = int(time.time())
-  self_play = 0.2
+  self_play = 0.1
 
   full_env_name = f"driver_planning:{env_name}-v0"
 
@@ -53,11 +53,13 @@ def train(env_name):
     path = f"./checkpoints/{env_name}_ppo_arch{'-'.join(map(str, arch))}_batch{batch_size}_g{gamma}_lr{learning_rate}_sp{self_play}_{timesteps}"
     print(f"Saving to {path}")
     model.save(path)
-    test(full_env_name, model, render=False, rounds=20)
+    test(full_env_name, model, render=render, rounds=20)
 
 
 if __name__ == "__main__":
-  args = sys.argv[1:]
-  assert len(args) > 0, "Usage: python train.py <env-name>"
-  env_name = args[0]
-  train(env_name)
+  parser = argparse.ArgumentParser(description='Train model in specified environment.')
+  parser.add_argument('env_name', type=str, help='Environment name')
+  parser.add_argument('--headless', default=False, action='store_true', help='Skip rendering.')
+  args = parser.parse_args()
+
+  train(args.env_name, render=not args.headless)

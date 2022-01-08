@@ -45,7 +45,7 @@ def newest(path):
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Evaluate model in specified environment.')
   parser.add_argument('env_name', type=str, help='Environment name')
-  parser.add_argument('--fast', default=False, action='store_true', help='Skip rendering.')
+  parser.add_argument('--headless', default=False, action='store_true', help='Skip rendering.')
   parser.add_argument('--path', type=str, default=None, help='Path to model.')
   parser.add_argument('--rounds', type=int, default=100, help='Number of rounds to test.')
   args = parser.parse_args()
@@ -55,4 +55,4 @@ if __name__ == "__main__":
 
   model = get_model(args.path)
   print("Testing model...")
-  test(f"driver_planning:{args.env_name}-v0", model, render=not args.fast, rounds=args.rounds) 
+  test(f"driver_planning:{args.env_name}-v0", model, render=not args.headless, rounds=args.rounds) 
