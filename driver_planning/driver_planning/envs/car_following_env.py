@@ -113,6 +113,8 @@ class CarFollowingEnv(gym.Env):
     #
     ego_id = 0
     ego = self.agents[ego_id]
+    if ego.x < 0 or ego.x > SCREEN_WIDTH:
+      done = True
     if ego.y < 0 or ego.y > SCREEN_HEIGHT:
       # TODO might need to be revisited with multiple controls
       done = True
