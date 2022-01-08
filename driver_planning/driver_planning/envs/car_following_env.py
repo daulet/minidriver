@@ -30,17 +30,18 @@ class CarFollowingEnv(gym.Env):
   metadata = {'render.modes': ['human', 'rgb_array']}
   # (Acceleration, Lateral)
   action_space = spaces.MultiDiscrete([3, 3])
+  observed_agents = 4
   observation_space = spaces.Dict({
     "goal":       spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32),
     "boundaries": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32),
-    "dynamic":    spaces.Box(low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32),
+    "dynamic":    spaces.Box(low=-np.inf, high=np.inf, shape=(observed_agents,3,), dtype=np.float32),
     "speed":      spaces.Discrete(MAX_SPEED+1),
   })
+  undefined_agent = (OBSERVATION_UNDEFINED, OBSERVATION_UNDEFINED, OBSERVATION_UNDEFINED)
   agent_colors = [
     (50,  200, 0  ), # green
     (100, 200, 255), # blue    
     (255, 100, 100), # red
-    (50,  200, 0  ), # green
     (200, 200, 0  ), # yellow
     (60,  60,  60 ), # black
     (200, 0,   150), # purple
@@ -66,6 +67,10 @@ class CarFollowingEnv(gym.Env):
       car = self.agents[i]
       distances.append((ego.x - car.x, ego.y - car.y, ego.speed - car.speed))
 
+    # self.agents includes ego, hence the -1
+    for i in range(len(self.agents)-1, CarFollowingEnv.observed_agents):
+      distances.append(CarFollowingEnv.undefined_agent)
+
     assert self.goals[agent_id] is not None, "Can't generate observation for an agent without controller"
     gx, gy = self.goals[agent_id]
     lb = self._lane_left_boundary(0)
@@ -73,8 +78,7 @@ class CarFollowingEnv(gym.Env):
     return {
       "goal":       (ego.x-gx, ego.y-gy), # distance to goal;
       "boundaries": (ego.x-lb, rb-ego.x),           # (left, right) distance to road boundaries;
-      # TODO fix shape of this box to allow multiple distances
-      "dynamic":    distances[0] if distances else (OBSERVATION_UNDEFINED, OBSERVATION_UNDEFINED, OBSERVATION_UNDEFINED), # distances to dynamic agents; 
+      "dynamic":    distances, # distances to dynamic agents; 
       "speed":      ego.speed,
     }
 

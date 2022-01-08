@@ -1,10 +1,11 @@
 import time
 
 from driver_planning.envs.arena_env import ArenaEnv
+from driver_planning.envs.car_following_env import CarFollowingEnv
 import gym
 import pytest
 
-from .car import Acceleration, Lateral
+from .car import Acceleration, Car, Lateral
 
 class FakeController(object):
     def reset(self):
@@ -19,24 +20,29 @@ def gen_seed():
 
 def test_consistency():
     seed = 2 # fixed seed to guarantee presence of agent
-    controllers = [FakeController()]
+    controllers = [FakeController() for _ in range(CarFollowingEnv.observed_agents)]
     env = gym.make('driver_planning:arena-v0', controllers=controllers)
     env.action_space.seed(seed = seed)
     env.reset(seed = seed)
 
-    prev_obs = None
-    for _ in range(10):
-        if prev_obs is not None:
-            oth_obs = env._state(agent_id=1)
+    for idx in range(len(env.agents)):
+        env.reset(seed = seed)
+        
+        prev_obs = None
+        for _ in range(10):
+            if prev_obs is not None:
+                oth_obs = env._state(agent_id=idx)
 
-            x1, y1, s1 = prev_obs['dynamic']
-            x2, y2, s2 = oth_obs['dynamic']
-            assert x1+x2==0
-            assert y1+y2==0
-            assert s1+s2==0
+                # observation for idx's agent from ego perspective
+                x1, y1, s1 = prev_obs['dynamic'][idx]
+                # observation for ego from idx's perspective
+                x2, y2, s2 = oth_obs['dynamic'][0]
+                assert x1+x2==0
+                assert y1+y2==0
+                assert s1+s2==0
 
-            assert prev_obs['speed'] - oth_obs['speed'] == s1 
-            assert oth_obs['speed'] - prev_obs['speed'] == s2
+                assert prev_obs['speed'] - oth_obs['speed'] == s1
+                assert oth_obs['speed'] - prev_obs['speed'] == s2
 
         prev_obs, _, _, _ = env.step((Acceleration.NEUTRAL, Lateral.STRAIGHT))
 
@@ -84,16 +90,16 @@ def test_recorded_observations():
         # print(f"{obs},")
 
     assert actual_observations == [
-        {'goal': (-35.0, 257), 'boundaries': (122.5, 52.5), 'dynamic': (30.0, -111, -1), 'speed': 3},
-        {'goal': (-35.0, 254), 'boundaries': (122.5, 52.5), 'dynamic': (30.0, -111, 0), 'speed': 3},
-        {'goal': (-35.0, 251), 'boundaries': (122.5, 52.5), 'dynamic': (25.0, -111, 0), 'speed': 3},
-        {'goal': (-35.0, 248), 'boundaries': (122.5, 52.5), 'dynamic': (20.0, -112, 1), 'speed': 3},
-        {'goal': (-35.0, 245), 'boundaries': (122.5, 52.5), 'dynamic': (25.0, -113, 1), 'speed': 3},
-        {'goal': (-35.0, 242), 'boundaries': (122.5, 52.5), 'dynamic': (20.0, -114, 1), 'speed': 3},
-        {'goal': (-35.0, 239), 'boundaries': (122.5, 52.5), 'dynamic': (25.0, -116, 2), 'speed': 3},
-        {'goal': (-35.0, 236), 'boundaries': (122.5, 52.5), 'dynamic': (20.0, -117, 1), 'speed': 3},
-        {'goal': (-35.0, 233), 'boundaries': (122.5, 52.5), 'dynamic': (15.0, -119, 2), 'speed': 3},
-        {'goal': (-35.0, 230), 'boundaries': (122.5, 52.5), 'dynamic': (10.0, -121, 2), 'speed': 3},
+        {'goal': (-35.0, 257), 'boundaries': (122.5, 52.5), 'dynamic': [(30.0, -111, -1), (70.0, -117, -2), (35.0, -26, 1), (10000.0, 10000.0, 10000.0)], 'speed': 3},                                               
+        {'goal': (-35.0, 254), 'boundaries': (122.5, 52.5), 'dynamic': [(30.0, -111, 0), (70.0, -115, -2), (35.0, -27, 1), (10000.0, 10000.0, 10000.0)], 'speed': 3},                                                
+        {'goal': (-35.0, 251), 'boundaries': (122.5, 52.5), 'dynamic': [(25.0, -111, 0), (70.0, -113, -2), (35.0, -28, 1), (10000.0, 10000.0, 10000.0)], 'speed': 3},                                                
+        {'goal': (-35.0, 248), 'boundaries': (122.5, 52.5), 'dynamic': [(20.0, -112, 1), (70.0, -111, -2), (35.0, -29, 1), (10000.0, 10000.0, 10000.0)], 'speed': 3},                                                
+        {'goal': (-35.0, 245), 'boundaries': (122.5, 52.5), 'dynamic': [(25.0, -113, 1), (70.0, -109, -2), (35.0, -30, 1), (10000.0, 10000.0, 10000.0)], 'speed': 3},                                                
+        {'goal': (-35.0, 242), 'boundaries': (122.5, 52.5), 'dynamic': [(20.0, -114, 1), (70.0, -107, -2), (35.0, -31, 1), (10000.0, 10000.0, 10000.0)], 'speed': 3},                                                
+        {'goal': (-35.0, 239), 'boundaries': (122.5, 52.5), 'dynamic': [(25.0, -116, 2), (70.0, -105, -2), (35.0, -32, 1), (10000.0, 10000.0, 10000.0)], 'speed': 3},                                                
+        {'goal': (-35.0, 236), 'boundaries': (122.5, 52.5), 'dynamic': [(20.0, -117, 1), (70.0, -103, -2), (35.0, -33, 1), (10000.0, 10000.0, 10000.0)], 'speed': 3},                                                
+        {'goal': (-35.0, 233), 'boundaries': (122.5, 52.5), 'dynamic': [(15.0, -119, 2), (70.0, -101, -2), (35.0, -34, 1), (10000.0, 10000.0, 10000.0)], 'speed': 3},                                                
+        {'goal': (-35.0, 230), 'boundaries': (122.5, 52.5), 'dynamic': [(10.0, -121, 2), (70.0, -99, -2), (35.0, -35, 1), (10000.0, 10000.0, 10000.0)], 'speed': 3}, 
 
     ]
 

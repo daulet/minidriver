@@ -16,7 +16,7 @@ def test(env_name, model, controllers=None, fps=240, render=False, rounds=10):
   env = gym.make(env_name, debug=True, controllers=controllers)
   
   failures, neutral, successes = 0, 0, 0
-  for i in range(rounds):
+  for _ in range(rounds):
     obs, rew = env.reset(seed=time.time()), 0
     done = False
     while not done:
