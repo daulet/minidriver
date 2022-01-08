@@ -24,6 +24,8 @@ SCREEN_WIDTH = 300
 SCREEN_HEIGHT = 500
 FPS = 30
 
+OBSERVATION_UNDEFINED = 1e4
+
 class CarFollowingEnv(gym.Env):
   metadata = {'render.modes': ['human', 'rgb_array']}
   # (Acceleration, Lateral)
@@ -48,8 +50,7 @@ class CarFollowingEnv(gym.Env):
     self.surface = None
     if controllers is None:
       controllers = []
-    # first controller is for ego
-    self.controllers = [None] + controllers
+    self.provided_controllers = controllers
     if debug:
       self._print = print
     else:
@@ -73,7 +74,7 @@ class CarFollowingEnv(gym.Env):
       "goal":       (ego.x-gx, ego.y-gy), # distance to goal;
       "boundaries": (ego.x-lb, rb-ego.x),           # (left, right) distance to road boundaries;
       # TODO fix shape of this box to allow multiple distances
-      "dynamic":    distances[0],                      # distances to dynamic agents; 
+      "dynamic":    distances[0] if distances else (OBSERVATION_UNDEFINED, OBSERVATION_UNDEFINED, OBSERVATION_UNDEFINED), # distances to dynamic agents; 
       "speed":      ego.speed,
     }
 
@@ -186,11 +187,14 @@ class CarFollowingEnv(gym.Env):
             random.randint(1, MAX_SPEED),
           )
     self.agents = [ego]
+    self.controllers = [None]
     self.goals = [self._goal_position(ego)]
     
-    for idx in range(1, 2):
-      if len(self.controllers) <= idx:
+    for idx in range(1, 1+self._num_agents()):      
+      if len(self.provided_controllers) <= idx-1:
         self.controllers.append(None)
+      else:
+        self.controllers.append(self.provided_controllers[idx-1])
 
       x, y, speed = self._agent_position(self.goals[0], self.agents[0])
       agent = Car(idx, x, y, speed)
@@ -266,6 +270,9 @@ class CarFollowingEnv(gym.Env):
 
   def _num_lanes(self):
     return random.randint(1, 5)
+
+  def _num_agents(self):
+    return 1
 
   def _goal_position(self, agent):
     agent_lane = self._current_lane(agent.x)

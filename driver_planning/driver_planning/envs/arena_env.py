@@ -11,6 +11,9 @@ class ArenaEnv(CarFollowingEnv):
     def _num_lanes(self):
         return random.randint(2, 5)
 
+    def _num_agents(self):
+        return random.randint(0, 1)
+
     def _goal_position(self, ego):
         # Pick a random lane
         goal_lane = random.randint(0, self.num_lanes-1)
