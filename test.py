@@ -12,7 +12,7 @@ def get_model(path):
   return PPO.load(path)
 
 
-def test(env_name, model, controllers=None, render=False, rounds=10):
+def test(env_name, model, controllers=None, fps=240, render=False, rounds=10):
   env = gym.make(env_name, debug=True, controllers=controllers)
   
   failures, neutral, successes = 0, 0, 0
@@ -24,7 +24,7 @@ def test(env_name, model, controllers=None, render=False, rounds=10):
       obs, reward, done, info = env.step(action)
       rew += reward
       if render:
-        env.render(fps=240)
+        env.render(fps=fps)
     if env._collided:
       failures += 1
     elif env._goal_reached:
@@ -45,6 +45,7 @@ def newest(path):
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Evaluate model in specified environment.')
   parser.add_argument('env_name', type=str, help='Environment name')
+  parser.add_argument('--fps', type=int, default=240, help='Frames per second, if --render is enabled.')
   parser.add_argument('--headless', default=False, action='store_true', help='Skip rendering.')
   parser.add_argument('--path', type=str, default=None, help='Path to model.')
   parser.add_argument('--rounds', type=int, default=100, help='Number of rounds to test.')
@@ -55,4 +56,4 @@ if __name__ == "__main__":
 
   model = get_model(args.path)
   print("Testing model...")
-  test(f"driver_planning:{args.env_name}-v0", model, render=not args.headless, rounds=args.rounds) 
+  test(f"driver_planning:{args.env_name}-v0", model, fps=args.fps, render=not args.headless, rounds=args.rounds) 

@@ -16,7 +16,9 @@ CAR_WIDTH = 25
 CAR_HEIGHT = 40
 
 LANE_WIDTH = 35
-LANE_LINE_WIDTH = 4
+EXTERNAL_LANE_LINE_WIDTH = 4
+LANE_LINE_WIDTH = 2
+LANE_COLOR = (255, 255, 255)
 
 SCREEN_WIDTH = 300
 SCREEN_HEIGHT = 500
@@ -33,12 +35,13 @@ class CarFollowingEnv(gym.Env):
     "speed":      spaces.Discrete(MAX_SPEED+1),
   })
   agent_colors = [
-    (  0, 128,   0), # Green
-    (  0,   0, 128), # Navy
-    (128,   0,   0), # Maroon
-  	(128, 128,   0), # Olive
-  	(128,   0, 128), # Purple
-  	(  0, 128, 128), # Teal
+    (50,  200, 0  ), # green
+    (100, 200, 255), # blue    
+    (255, 100, 100), # red
+    (50,  200, 0  ), # green
+    (200, 200, 0  ), # yellow
+    (60,  60,  60 ), # black
+    (200, 0,   150), # purple
   ]
 
   def __init__(self, controllers=None, debug=False):
@@ -212,13 +215,13 @@ class CarFollowingEnv(gym.Env):
     
     pygame.event.get()
 
-    self.surface.fill((255, 255, 255))
+    self.surface.fill((150, 150, 150))
     for lane_id in range(self.num_lanes+1):
       lane_x = self._lane_left_boundary(lane_id)
-      color = (0, 0, 0)
+      lane_width =  LANE_LINE_WIDTH
       if lane_id in [0, self.num_lanes]: # edge lanes
-        color = (255, 255, 0)
-      pygame.draw.line(self.surface, color, (lane_x, 0), (lane_x, SCREEN_HEIGHT), LANE_LINE_WIDTH)
+        lane_width = EXTERNAL_LANE_LINE_WIDTH
+      pygame.draw.line(self.surface, LANE_COLOR, (lane_x, 0), (lane_x, SCREEN_HEIGHT), lane_width)
 
     for idx, goal in enumerate(self.goals):
       if goal is None:
@@ -250,6 +253,7 @@ class CarFollowingEnv(gym.Env):
     rect = self._car_rect(agent)
     color = CarFollowingEnv.agent_colors[agent.id]
     pygame.draw.rect(self.surface, color, rect)
+    pygame.draw.rect(self.surface, (0,0,0), rect, width=2)
 
 
   def close(self):

@@ -1,3 +1,7 @@
+# Hide pygame support prompt
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+
 from gym.envs.registration import register
 
 register(
