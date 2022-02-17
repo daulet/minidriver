@@ -160,7 +160,7 @@ class CarFollowingEnv(gym.Env):
         reward = 0.001 # incentivize movement
 
     # limit ego that just stops
-    if self.steps == SCREEN_HEIGHT:
+    if self.steps == 2*SCREEN_HEIGHT:
       done = True
     self.rewards += reward
     if done:

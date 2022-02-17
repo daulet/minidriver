@@ -1,0 +1,48 @@
+
+behavior
+========
+//add more agents to stabilize lane changing, make it more difficult?
+min/max speed reward
+maybe add trajectory, min/max speed, planned stop to observation to be able to replace smart agents with intent?
+traffic lights
+goal reward proportional to distance to the goal when cross y=goal's
+drop overtaking agent in lane task - see how it performs
+why multiagent with same model match each other speed?
+multiagent with bad model, e.g. that one drives out of bounds, makes a good model get confused - adversary training
+
+
+train.py
+========
+arena is not a zero sum game, so self play is not useful - add compettive env where they share goal
+Add --continue option to pick from latest relevant checkpoint
+//mix in other models in training? e.g. some of the 16 env use non-fixed agents
+normalize action space: https://stable-baselines3.readthedocs.io/en/master/guide/rl_tips.html#tips-and-tricks-when-creating-a-custom-environment
+hyperparamater tuning:
+https://github.com/DLR-RM/rl-baselines3-zoo#hyperparameter-tuning
+
+Try training on image instead of vector space, resnet34
+maybe validation should be distinct env, new use case? (training env, validation env, test env)
+
+
+env
+=======
+//sometimes no agents to make it learn not to follow other agent
+agents slow down to simulate traffic
+new env where current lane is stopped, but there is moving traffic on the right, ego needs to learn to join safely
+some agents stop when achieving goal in arena - let them drive further in training? reset goal, maybe punish change in motion
+common base env
+combine both environments? i.e. choose randomly
+
+do real rotation of ego, prepare for turn environment
+right turn environment
+
+
+rewards
+=======
+[P3] staying in lane: distance to lane boundaries - seems unnecessary
+
+
+readme
+======
+Main lesson: small absolute rewards (e.g. no -1e9 for collision), and small nets (quickly find out if learning)
+see commits for lessons learned

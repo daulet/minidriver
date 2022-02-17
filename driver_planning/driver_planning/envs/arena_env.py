@@ -12,14 +12,14 @@ class ArenaEnv(CarFollowingEnv):
         return random.randint(2, 5)
 
     def _num_agents(self):
-        return random.randint(0, 3)
+        return random.randint(0, 1)
 
     def _goal_position(self, ego):
         # Pick a random lane
         goal_lane = random.randint(0, self.num_lanes-1)
         return (self._lane_left_boundary(goal_lane) + self._lane_left_boundary(goal_lane+1))/2, 0
 
-    # TODO: pass in [(agent, goal)]
+    # TODO: pass in [(agent, goal)] to detect collisions
     def _agent_position(self, goal, ego):
         speed = random.randint(1, MAX_SPEED)
         agent_lane = random.randint(0, self.num_lanes-1)

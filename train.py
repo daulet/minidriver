@@ -1,27 +1,36 @@
 import argparse
 import io
 import time
-from driver_planning.controller import Controller
 
+from gym.wrappers import TimeLimit
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 
+from driver_planning.controller import Controller
+from driver_planning.envs.car_following_env import SCREEN_HEIGHT
 from test import test
 
 def train(env_name, render):
   ITERATION = 10**6
   LIMIT = 10**7
   arch = [64, 64, 64]
-  batch_size = 256
+  batch_size = 128
   gamma = 0.99
-  learning_rate = 1e-3
+  learning_rate = 1e-4
   seed = int(time.time())
-  self_play = 0.1
+  self_play = 0.0
 
   full_env_name = f"driver_planning:{env_name}-v0"
 
   controller = Controller(None, self_play=self_play)
-  env = make_vec_env(full_env_name, n_envs=16, seed=seed, env_kwargs={'controllers':[controller]})
+  env = make_vec_env(
+    full_env_name,
+    n_envs=16,
+    seed=seed,
+    wrapper_class=TimeLimit,
+    env_kwargs={'controllers':[]},
+    wrapper_kwargs={'max_episode_steps': SCREEN_HEIGHT},
+  )
   model = PPO(
     "MultiInputPolicy",
     env,
