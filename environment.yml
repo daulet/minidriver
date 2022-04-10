@@ -1,0 +1,16 @@
+name: minidriver
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - cudatoolkit=11.3
+  - pip
+  - pytest
+  - pytorch
+  - tensorboard
+  - torchvision
+  - pip:
+    - gym
+    - pygame
+    - stable-baselines3

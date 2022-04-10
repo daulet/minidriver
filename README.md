@@ -13,3 +13,19 @@ To avoid such unnatural behavior, we've added a small negative reward for being 
 While preparing for the next environment, we've added ability to move ego laterally, after which the model learned to overtake the lead car to reach the goal faster.
 
 ![Overtaking example](./assets/02%20overtaking.gif)
+
+## Getting Started
+
+Setup environment
+```
+conda env create -f environment.yml
+conda activate minidriver
+pip install -e ./driver_planning
+```
+
+To try one of the pretrained models:
+```
+python test.py arena --path models/stable --fps=30 --rounds=10
+```
+
+Currently there are three environments: *car-following* (lead car between ego and goal), *lane-changing* (reaching a goal requires a lane change) and *arena* (arbitrary number of agents and goal position).
