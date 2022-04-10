@@ -1,32 +1,15 @@
-## Install
-```
-pip install -r requirements.txt
-pip install -e ./driver_planning
-```
-
-## Test
-```
-pytest
-```
+This is a minimal environment to demonstrate that even a small network can learn to "drive" in reinforcement learning setting with simple and intuitive rewards. For example, lane boundaries are not known to the agent, it is learned from negative reward for driving between lanes (number of lanes changes, so lane position can't be easily memorized).
 
 ## Evolution
 
-1. First trained model learned to let the lead car to get further away and then speed towards the goal, while not hitting the lead car.
+Initially model learned to be passive: let the lead car disappear from the view and then accelerate towards the goal.
 
-To reproduce disable lateral movement in environment:
-```
-python test.py models/carfollowing_ppo_sandbagging
-```
+![Sandbagging example](./assets/00%20sandbagging.gif)
 
-2. To avoid such sporadic behavior, we've added a negative reward for completely stopping, after which model learned to follow the lead car.
+To avoid such unnatural behavior, we've added a small negative reward for being stationary, after which model learned to follow the lead car, sometimes tailgating.
 
-To reproduce disable lateral movement in environment:
-```
-python test.py models/carfollowing_ppo_following
-```
+![Following example](./assets/01%20following.gif)
 
-3. When preparing for the next task, we've added ability to move laterally, after which the model learned to overtake the lead car to reach the goal faster.
+While preparing for the next environment, we've added ability to move ego laterally, after which the model learned to overtake the lead car to reach the goal faster.
 
-```
-python test.py models/carfollowing_ppo_overtaking
-```
+![Overtaking example](./assets/02%20overtaking.gif)
